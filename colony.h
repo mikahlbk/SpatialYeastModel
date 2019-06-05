@@ -43,9 +43,10 @@ class Colony: public enable_shared_from_this<Colony>{
 
 		//cell actions
 		void grow_cells();
-	//	void update_cell_cycles();
-	//	void perform_budding();
-	//	void perform_mitosis();
+		void update_cell_cycles();
+        int get_Num_Cells();
+        void perform_budding();
+		void perform_mitosis();
 		void update_Locations();
 		void print_vtk_file(ofstream& ofs);
 };

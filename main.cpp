@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
     int start = clock();
 	//cout << "clock" << endl;
 	//create initial colony with specified number of cells
-	int init_cells = 2;
+	int init_cells = 1;
 	cout << init_cells << endl;
 	auto growing_Colony = make_shared<Colony>();
-	//cout << "Made colony" << endl;
+	cout << "Made colony" << endl;
 	growing_Colony->make_cells(init_cells);
-	//cout << "Made new colony with initial number of cells" << endl;
+	cout << "Made new colony with initial number of cells" << endl;
 	
 	//some variables for writing data
 	int digits;
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 	int out = 0;
 
 	//variable for main loop
-	int numSteps = 1000;
+	int numSteps = 75;
 
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
@@ -55,13 +55,16 @@ int main(int argc, char* argv[]) {
 		growing_Colony->grow_cells();
 		
 		//cell_cycle
-	//	colony.update_cell_cycles;
+	    cout << "growth" << endl;
+        growing_Colony->update_cell_cycles();
 
 		//budding
-	//	colony.perform_budding;
+        cout<< "budding" << endl;
+		growing_Colony->perform_budding();
 
 		//remove buds that are big enough
-	//	colony.perform_mitosis();
+        cout << "mitosis" << endl;
+		growing_Colony->perform_mitosis();
 
 		//spatial rearrangment
 		growing_Colony->update_Locations();

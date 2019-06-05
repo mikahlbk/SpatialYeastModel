@@ -39,14 +39,14 @@ void Colony::make_cells(int init_cells){
 		
 		auto new_cell = make_shared<Cell>(this_colony, rank, center, max_radius, init_radius);
 		update_cell_vec(new_cell);
-    	rank = cells.size();
+    	/*rank = cells.size();
 		max_radius = static_cast<double>(rand() % 3 + 99)/(double)(100.0);
 		init_radius = .2;
 		center = Coord(.3,0);
 		//cout << "Assigned max radius" << max_radius << endl;
 		
 		new_cell = make_shared<Cell>(this_colony, rank, center, max_radius, init_radius);
-		update_cell_vec(new_cell);
+		update_cell_vec(new_cell);*/
 	
 	return;
 }
@@ -67,8 +67,10 @@ void Colony::grow_cells(){
 	}
 	return;
 }
-
-/*void Colony::update_cell_cycles(){
+int Colony::get_Num_Cells(){
+    return cells.size();
+}
+void Colony::update_cell_cycles(){
 	for(unsigned int i = 0; i < cells.size(); i++){
 		cells.at(i)->update_cell_cycle();
 	}
@@ -76,22 +78,29 @@ void Colony::grow_cells(){
 }
 
 void Colony::perform_budding(){
-	for(unsigned int i=0; i < cells.size(); i++){
-		if(cells.at(i)->get_S()){
-			perform_budding();
+	cout << "budding" << endl;
+    cout << cells.size() << endl;
+    //for(unsigned int i=0; i < 1; i++){
+		cout << "calling truth" << endl;
+        if(cells.at(0)->get_S()){
+			cout << "entering budding" << endl;
+            perform_budding();
+            cout << "check two" << endl;
 		}
-	}
+	//}
 	return;
 }
 
 void Colony::perform_mitosis(){
 	for(unsigned int i = 0; i < cells.size(); i++){
-		if(cells.at(i)->get_M()){
+		cout << "mitosis check" << endl;
+        if(cells.at(i)->get_M()){
 			perform_mitosis();
 		}
-	}
+        cout << "tissue" << endl;
+    }
 	return;
-}*/
+}
 
 void Colony::update_Locations(){
 	for(unsigned int i = 0; i < cells.size(); i++){

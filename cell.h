@@ -50,25 +50,25 @@ class Cell: public enable_shared_from_this<Cell>{
 	public:
 		//Constructor
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius);
-		
+        Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother);		
 		Coord get_Cell_Center(){return cell_center;}
-	//	shared_ptr<Cell> get_mother(){return curr_mother;}
-	//	shared_ptr<Cell> get_daughter() {return curr_daughter;}
-	//	void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);
-	//	bool get_G1() {return G1;}
-	//	bool get_G2() {return G2;}
-	//	bool get_S() {return S;}
-	//	bool get_M() {return M;}
+		shared_ptr<Cell> get_mother(){return curr_mother;}
+		shared_ptr<Cell> get_daughter() {return curr_daughter;}
+		void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);
+		bool get_G1() {return G1;}
+		bool get_G2() {return G2;}
+		bool get_S() {return S;}
+		bool get_M() {return M;}
 		double get_radius() {return curr_radius;}
 		double get_max_radius() {return max_radius;}
 		shared_ptr<Colony> get_Colony() {return my_colony;}
 		int get_rank() {return rank;}
-		
+        void set_daughter(shared_ptr<Cell> daughter);		
 		void grow_cell();
-	//	void update_cell_cycle();
-	//	void enter_mitosis();
-	//	void perform_budding();
-	//	void perform_mitosis();
+		void update_cell_cycle();
+		void enter_mitosis();
+		void perform_budding();
+		void perform_mitosis();
 		void calc_forces();
 		void update_location(); 
 		void print_cell_center(ofstream& ofs);	

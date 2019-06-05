@@ -25,8 +25,32 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
 	this->cell_center = cell_center;
 	this->max_radius = max_radius;
 	this->curr_radius = init_radius;
-	this->G1 = true;
-    //more to assign
+    this->age = 0;
+    this->G1 = true;
+    this->G2 = false;
+    this->S = false;
+    this->M = false;
+    this->curr_mother = nullptr;
+    this->curr_daughter= nullptr;
+    this->is_bud = false;
+
+	return;
+}
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother){
+	this->my_colony = my_colony;
+	this->rank = rank;
+	this->cell_center = cell_center;
+	this->max_radius = max_radius;
+	this->curr_radius = init_radius;
+    this->age = 0;
+    this->G1 = true;
+    this->G2 = false;
+    this->S = false;
+    this->M = false;
+    this->curr_mother = mother;
+    this->curr_daughter= nullptr;
+    this->is_bud = true;
+
 	return;
 }
 /*void Cell::get_daughters(vector<shared_ptr<Cell>>& daughter_cells){
@@ -34,7 +58,10 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
 	daughter_cells = this_cell->daughters;
 	return;
 }*/
-
+void Cell::set_daughter(shared_ptr<Cell> daughter){
+        this->curr_daughter = daughter;
+        return;
+}
 void Cell::grow_cell(){
 	if(G1){
 		double f_radius = k_g1*curr_radius + k_g2;
@@ -45,7 +72,7 @@ void Cell::grow_cell(){
 	return;
 }
 
-/*void Cell::update_cell_cycle(){
+void Cell::update_cell_cycle(){
 	shared_ptr<Cell> this_cell = shared_from_this();
 	//cell cycle phase of a bud is started at G1
 	//when the bud grows big enough
@@ -89,15 +116,33 @@ void Cell::enter_mitosis(){
 
 void Cell::perform_budding(){
 	//make bud
-	//new cell is G1 and old cell is G2
+    cout << "cell function" << endl;
+    shared_ptr<Cell> this_cell = shared_from_this();
+    shared_ptr<Colony> this_colony = this->get_Colony();
+    int new_rank = this_colony->get_Num_Cells();
+    double init_radius = .3;
+	Coord new_center = this->cell_center + this->curr_radius;
+    auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center, max_radius, init_radius,this_cell);
+    this->set_daughter(new_cell);
+    G1 = false;
+    S = false;
+    G2 = true;
+    M = false;
+    this_colony->update_cell_vec(new_cell);
+    //new cell is G1 and old cell is G2
 	return;
 }
 
 void Cell::perform_mitosis(){
 	//separate mother and daughter
-	//daughter remains G1 and mother gets set to G1
+    if(M){
+            this->curr_mother = nullptr;
+            M = false;
+            G1 = true;
+    }
+    //daughter remains G1 and mother gets set to G1
 	return;
-}*/
+}
 void Cell::calc_forces(){
 	vector<shared_ptr<Cell>> neighbor_cells;
 	my_colony->get_Cells(neighbor_cells);
