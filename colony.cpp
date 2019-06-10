@@ -78,16 +78,16 @@ void Colony::update_cell_cycles(){
 }
 
 void Colony::perform_budding(){
-	cout << "budding" << endl;
-    cout << cells.size() << endl;
-    //for(unsigned int i=0; i < 1; i++){
+	cout << "budding colony func" << endl;
+    //cout << cells.size() << endl;
+    for(unsigned int i=0; i < cells.size(); i++){
 		cout << "calling truth" << endl;
         if(cells.at(0)->get_S()){
 			cout << "entering budding" << endl;
-            perform_budding();
+            cells.at(i)->perform_budding();
             cout << "check two" << endl;
 		}
-	//}
+	}
 	return;
 }
 
@@ -95,7 +95,7 @@ void Colony::perform_mitosis(){
 	for(unsigned int i = 0; i < cells.size(); i++){
 		cout << "mitosis check" << endl;
         if(cells.at(i)->get_M()){
-			perform_mitosis();
+			cells.at(i)->perform_mitosis();
 		}
         cout << "tissue" << endl;
     }

@@ -129,7 +129,7 @@ void Cell::perform_budding(){
     G2 = true;
     M = false;
     this_colony->update_cell_vec(new_cell);
-    //new cell is G1 and old cell is G2
+	//new cell is G1 and old cell is G2
 	return;
 }
 

@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 	
 	//some variables for writing data
 	int digits;
-    string format = ".vtk";
+	string format = ".vtk";
 	string Number;
 	string initial = "/Spatial_Model_Yeast_";
 	string Filename;
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 	int out = 0;
 
 	//variable for main loop
-	int numSteps = 75;
+	int numSteps = 500;
 
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
 		growing_Colony->perform_mitosis();
 
 		//spatial rearrangment
+		cout << "rearrange" << endl;
 		growing_Colony->update_Locations();
 	
 		//make vtk files
