@@ -49,6 +49,7 @@ class Colony: public enable_shared_from_this<Colony>{
 		void perform_mitosis();
 		void update_Locations();
 		void print_vtk_file(ofstream& ofs);
+        void write_data(ofstream& ofs);
 };
 
 //*********************************************

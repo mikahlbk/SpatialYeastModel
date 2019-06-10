@@ -116,11 +116,11 @@ void Cell::enter_mitosis(){
 
 void Cell::perform_budding(){
 	//make bud
-    cout << "cell function" << endl;
+    //cout << "cell function" << endl;
     shared_ptr<Cell> this_cell = shared_from_this();
     shared_ptr<Colony> this_colony = this->get_Colony();
     int new_rank = this_colony->get_Num_Cells();
-    double init_radius = .3;
+    double init_radius = .01;
 	Coord new_center = this->cell_center + this->curr_radius;
     auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center, max_radius, init_radius,this_cell);
     this->set_daughter(new_cell);
@@ -139,6 +139,7 @@ void Cell::perform_mitosis(){
             this->curr_mother = nullptr;
             M = false;
             G1 = true;
+            is_bud = false;
     }
     //daughter remains G1 and mother gets set to G1
 	return;
@@ -176,6 +177,10 @@ void Cell::calc_forces(){
 void Cell::update_location(){
 	cell_center = cell_center + curr_force*dt;
 	return;
+}
+void Cell::print_txt_file_format(ofstream& ofs){
+    ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << endl;
+    return;
 }
 void Cell::print_cell_center(ofstream& ofs){
     ofs << cell_center.get_X() << " " << cell_center.get_Y() << " " << 0 << endl;

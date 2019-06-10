@@ -71,7 +71,8 @@ class Cell: public enable_shared_from_this<Cell>{
 		void perform_mitosis();
 		void calc_forces();
 		void update_location(); 
-		void print_cell_center(ofstream& ofs);	
+		void print_txt_file_format(ofstream& ofs);
+        void print_cell_center(ofstream& ofs);	
 };
 
 //End Cell Class

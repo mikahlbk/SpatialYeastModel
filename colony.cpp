@@ -78,14 +78,14 @@ void Colony::update_cell_cycles(){
 }
 
 void Colony::perform_budding(){
-	cout << "budding colony func" << endl;
+    //cout << "budding colony func" << endl;
     //cout << cells.size() << endl;
     for(unsigned int i=0; i < cells.size(); i++){
-		cout << "calling truth" << endl;
+		//cout << "calling truth" << endl;
         if(cells.at(0)->get_S()){
-			cout << "entering budding" << endl;
+			//cout << "entering budding" << endl;
             cells.at(i)->perform_budding();
-            cout << "check two" << endl;
+            //cout << "check two" << endl;
 		}
 	}
 	return;
@@ -93,11 +93,11 @@ void Colony::perform_budding(){
 
 void Colony::perform_mitosis(){
 	for(unsigned int i = 0; i < cells.size(); i++){
-		cout << "mitosis check" << endl;
+		//cout << "mitosis check" << endl;
         if(cells.at(i)->get_M()){
 			cells.at(i)->perform_mitosis();
 		}
-        cout << "tissue" << endl;
+        //cout << "tissue" << endl;
     }
 	return;
 }
@@ -111,6 +111,13 @@ void Colony::update_Locations(){
 		cells.at(i)->update_location();
 	}
 	return;
+}
+void Colony::write_data(ofstream& ofs){
+    ofs << cells.size() << endl;
+    for(unsigned int i = 0; i < cells.size();i++){
+        cells.at(i)->print_txt_file_format(ofs);
+    }
+    return;
 }
 void Colony::print_vtk_file(ofstream& ofs){
 	vector<shared_ptr<Cell>> colony_cells;
