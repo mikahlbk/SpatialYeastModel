@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
         }*/
         //make vtk files
         //on pause
-		if(Ti%1000 == 0){digits = ceil(log10(out +1));
+	if(Ti%1000 == 0){digits = ceil(log10(out +1));
 		if(digits == 1 || digits == 0){
 			Number = "0000" + to_string(out);
 		}
