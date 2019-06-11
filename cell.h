@@ -39,7 +39,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool S;
 		bool G2;
 		bool M;
-		vector<shared_ptr<Cell> > daughters;
+		vector<shared_ptr<Cell>> daughters;
 		shared_ptr<Cell> curr_daughter;
 		shared_ptr<Cell> curr_mother;
 		bool is_bud;
@@ -64,7 +64,9 @@ class Cell: public enable_shared_from_this<Cell>{
 		shared_ptr<Colony> get_Colony() {return my_colony;}
 		int get_rank() {return rank;}
         void set_daughter(shared_ptr<Cell> daughter);		
-		void grow_cell();
+		void set_mother(shared_ptr<Cell> mother);
+        void set_is_bud(bool bud_status);
+        void grow_cell();
 		void update_cell_cycle();
 		void enter_mitosis();
 		void perform_budding();

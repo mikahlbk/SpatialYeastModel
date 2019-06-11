@@ -35,19 +35,20 @@ class Colony: public enable_shared_from_this<Colony>{
 	public:
 		//constructor
 		Colony();
+        //make founder cell
+        void make_founder_cell();
 		
 		//getters and setters
-		void get_Cells(vector<shared_ptr<Cell> >& new_cells);
-		void update_cell_vec(shared_ptr<Cell> new_cell);
-		void make_cells(int initcells);
+		void get_Cells(vector<shared_ptr<Cell>>& new_cells);
+		void update_Colony_Cell_Vec(shared_ptr<Cell> new_cell);
+		int get_Num_Cells();
 
 		//cell actions
 		void grow_cells();
 		void update_cell_cycles();
-        int get_Num_Cells();
         void perform_budding();
 		void perform_mitosis();
-		void update_Locations();
+		void update_locations();
 		void print_vtk_file(ofstream& ofs);
         void write_data(ofstream& ofs);
 };

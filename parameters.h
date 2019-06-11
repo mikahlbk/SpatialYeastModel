@@ -16,7 +16,7 @@
 //Simulation Constants
 
 //timestep
-const double dt = .01;
+const double dt = .001;
 
 //These two growth parameters set the timescale
 const double k_g1 = .01;
