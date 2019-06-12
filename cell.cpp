@@ -33,6 +33,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->curr_mother = nullptr;
     this->curr_daughter= nullptr;
     this->is_bud = false;
+    this->has_bud = false;
 
 	return;
 }
@@ -50,7 +51,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->curr_mother = mother;
     this->curr_daughter= nullptr;
     this->is_bud = true;
-
+    this->has_bud = false;
 	return;
 }
 void Cell::get_daughters(vector<shared_ptr<Cell>>& daughter_cells){
@@ -67,9 +68,13 @@ void Cell::set_mother(shared_ptr<Cell> mother){
         return;
 }
 
-void Cell::set_is_bud(bool bud_status){
-        this->is_bud = bud_status;
+void Cell::reset_is_bud(){
+        this->is_bud = false;
         return;
+}
+
+void Cell::reset_has_bud(){
+        this->has_bud = false;
 }
 
 void Cell::grow_cell(){
@@ -129,10 +134,15 @@ void Cell::perform_budding(){
     shared_ptr<Cell> this_cell = shared_from_this();
     shared_ptr<Colony> this_colony = this->get_Colony();
     int new_rank = this_colony->get_Num_Cells();
-    double init_radius = .01;
-	Coord new_center = this->cell_center+this->curr_radius;
+    double init_radius = .2;
+    double rand_angle = rand()%360;
+    rand_angle = rand_angle/3.14*180;
+	double new_center_x = this->cell_center.get_X()+this->curr_radius*cos(rand_angle);
+    double new_center_y = this->cell_center.get_Y()+this->curr_radius*sin(rand_angle);
+    Coord new_center = Coord(new_center_x, new_center_y);
     auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center, max_radius, init_radius,this_cell);
     this->set_daughter(new_cell);
+    this->has_bud = true;
     G1 = false;
     S = false;
     G2 = true;
@@ -144,15 +154,46 @@ void Cell::perform_budding(){
 
 void Cell::perform_mitosis(){
 	//separate mother and daughter
+    this->curr_daughter->reset_is_bud();
+    this->reset_has_bud();
     this->curr_daughter->set_mother(nullptr);
-    this->curr_daughter->set_is_bud(false);
-    this->curr_daughter = nullptr;
+    this->set_daughter(nullptr); 
     M = false;
     G1 = true;
     //daughter remains G1 and mother gets set to G1
 	return;
 }
-void Cell::calc_forces(){
+void Cell::calc_forces_chou(){
+    double d_ij; 
+    double delta_d;
+    Coord v_ij;
+    vector<shared_ptr<Cell>> neighbor_cells;
+    my_colony->get_Cells(neighbor_cells);
+    Coord my_loc = cell_center;
+    double my_radius = curr_radius;
+    Coord neighbor_loc;
+    double neighbor_radius;
+    Coord rep_force;
+    Coord adh_force;
+    shared_ptr<Cell> this_cell = shared_from_this();
+    for(unsigned int i=0; i<neighbor_cells.size(); i++){
+            if(neighbor_cells.at(i) != this_cell){
+            neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
+            neighbor_radius = neighbor_cells.at(i)->get_radius();
+            d_ij = (my_loc-neighbor_loc).length();
+            delta_d = my_radius + neighbor_radius - d_ij;
+            v_ij = (neighbor_loc-my_loc)/d_ij;
+            if(d_ij < my_radius+neighbor_radius){
+                    rep_force = v_ij*delta_d*k_r*-1;
+                    adh_force = v_ij*delta_d*k_a;
+            }
+    }
+    }
+    this->curr_force = rep_force +  adh_force;
+    return;
+}
+            
+void Cell::calc_forces_jonsson(){
 	vector<shared_ptr<Cell>> neighbor_cells;
 	my_colony->get_Cells(neighbor_cells);
 	Coord my_loc = cell_center;
@@ -164,7 +205,7 @@ void Cell::calc_forces(){
 	shared_ptr<Cell> this_cell = shared_from_this();
 	Coord diff_vect;
     	double diff_len;
-    	//cout << rep_force << adh_force << endl;
+    //cout << rep_force << adh_force << endl;
 	for(unsigned int i = 0; i < neighbor_cells.size(); i++){
 		neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
 		neighbor_radius = neighbor_cells.at(i)->get_radius();
@@ -172,35 +213,100 @@ void Cell::calc_forces(){
         	diff_len = diff_vect.length();
         	//cout << (my_loc - neighbor_loc).length() << endl;
 		if(neighbor_cells.at(i) != this_cell){
-            		if((neighbor_cells.at(i) == curr_daughter)){
-                		rep_force += (diff_vect/diff_len)*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
-                		if((my_loc - neighbor_loc).length() < 1.1*(my_radius + neighbor_radius)){
-		            		adh_force += (diff_vect/diff_len)*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud*-1;
+          if((this->is_bud)||(this->has_bud)){
+                if((neighbor_cells.at(i) == curr_daughter)){
+                    //cout << "Cell rank " << this->rank << " has daughter " << this->curr_daughter->get_rank() << endl;
+                    rep_force += (diff_vect/diff_len)*(diff_len-(my_radius/(neighbor_radius+my_radius))*(my_radius+neighbor_radius))*k_spring;
+                	    if((my_loc - neighbor_loc).length() < 1.1*(my_radius + neighbor_radius)){
+		            	    adh_force += (diff_vect/diff_len)*(diff_len-(my_radius/(neighbor_radius+my_radius))*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
                 		}		
-            		}
-            		else if((neighbor_cells.at(i) == curr_mother)){
-                		rep_force += (diff_vect/diff_len)*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+            	}
+            	else if((neighbor_cells.at(i) == curr_mother)){
+                    //cout << "Cell rank " << rank << " has mother " << curr_mother->get_rank() << endl;
+                	rep_force += (diff_vect/diff_len)*(diff_len-(neighbor_radius/(my_radius+neighbor_radius))*(neighbor_radius+my_radius))*k_spring;
 	            		if((my_loc - neighbor_loc).length() < 1.1*(my_radius + neighbor_radius)){
-		            		adh_force += (diff_vect/diff_len)*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud*-1;
+		            		adh_force += (diff_vect/diff_len)*(diff_len -(neighbor_radius/(my_radius+neighbor_radius))*(neighbor_radius+my_radius))*k_spring*k_adhesion_mother_bud;
                 		}
-            		}
-            		else {
-                		rep_force += (diff_vect/diff_len)*(diff_len - k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
-	            		if((my_loc - neighbor_loc).length() < 1.1*(my_radius + neighbor_radius)){
-		            		adh_force += (diff_vect/diff_len)*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_cell_cell*-1;
+            	}
+            }
+           else {
+		//cout << "regular cell" << rank << endl;
+                rep_force += (diff_vect/diff_len)*(diff_len - k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+	                if((my_loc - neighbor_loc).length() < 1.1*(my_radius + neighbor_radius)){
+		                adh_force += (diff_vect/diff_len)*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_cell_cell;
                 
-                		}   
-	        	}
+                	}   
+	       }
 	    }	
-    	}	
+    }	
 	this->curr_force = rep_force + adh_force;
 	//cout << curr_force << endl;
 	return;
 }
+
+void Cell::calc_forces_exponential(){
+    double dd;
+    double aaa = .5;
+    double ppp = .4;
+	vector<shared_ptr<Cell>> neighbor_cells;
+	my_colony->get_Cells(neighbor_cells);
+	Coord my_loc = cell_center;
+	double my_radius = curr_radius;
+	Coord neighbor_loc;
+	double neighbor_radius;
+    double potential_double;
+	Coord potential = Coord(0,0);
+	Coord adh_force = Coord(0,0);
+	shared_ptr<Cell> this_cell = shared_from_this();
+	Coord diff_vect;
+    double diff_len;
+    for(unsigned int i = 0; i < neighbor_cells.size();i++){
+            if(neighbor_cells.at(i)!= this_cell){
+                neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
+                neighbor_radius = neighbor_cells.at(i)->get_radius();
+                diff_vect = (my_loc-neighbor_loc);
+                diff_len = diff_vect.length();
+                dd = diff_len/((my_radius + neighbor_radius)*.5);
+                if(dd < 2){
+                    potential_double = exp(-dd*ppp)*dd;
+                    potential = potential + (diff_vect/dd)*potential_double/ppp;
+                }
+            }
+    }
+    this->curr_force = potential;
+    return;
+}
+                
 void Cell::update_location(){
 	cell_center = cell_center + curr_force*dt;
 	return;
 }
+
+double Cell::compute_indica(){
+    double d_ij;
+    double delta_d;
+    vector<shared_ptr<Cell>> neighbor_cells;
+    my_colony->get_Cells(neighbor_cells);
+    Coord my_loc = cell_center;
+    double my_radius = curr_radius;
+    Coord neighbor_loc;
+    double neighbor_radius;
+    double max = 0;
+    shared_ptr<Cell> this_cell = shared_from_this();
+    for(unsigned int i=0; i<neighbor_cells.size(); i++){
+            if(neighbor_cells.at(i) != this_cell){
+                neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
+                neighbor_radius = neighbor_cells.at(i)->get_radius();
+                d_ij = (my_loc-neighbor_loc).length();
+                delta_d = my_radius + neighbor_radius - d_ij;
+                if(delta_d > max){
+                    max = delta_d;
+                }
+            }
+    }
+    return max;
+}
+    
 void Cell::print_txt_file_format(ofstream& ofs){
     ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << endl;
     return;

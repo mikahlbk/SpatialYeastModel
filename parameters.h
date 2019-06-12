@@ -16,7 +16,7 @@
 //Simulation Constants
 
 //timestep
-const double dt = .001;
+const double dt = .1;
 
 //These two growth parameters set the timescale
 const double k_g1 = .01;
@@ -59,9 +59,12 @@ const double k_repulsion_cell_cell = .9;
 const double k_adhesion_mother_bud = 1;
 
 //adhesion between unrelated cells
-const double k_adhesion_cell_cell = .3;
+const double k_adhesion_cell_cell = .5;
 
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
 
+//chou model params
+const double k_r = .9; 
+const double k_a = 1.1;
 #endif

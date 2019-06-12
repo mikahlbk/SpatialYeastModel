@@ -38,24 +38,24 @@ int main(int argc, char* argv[]) {
 	//cout << "Made founder cell" << endl;
 	
     //variables for writing output files
-    /*string format = ".txt";
+    string format = ".txt";
     string initial = "/locations";
     int out = 1;
     ofstream myfile;
     string Number;
-    string Filename;*/
+    string Filename;
 
     //some variables for writing vtk files
-	int digits;
+	/*int digits;
 	string format = ".vtk";
 	string Number;
 	string initial = "/Spatial_Model_Yeast_";
 	string Filename;
 	ofstream ofs_anim;
-	int out = 0;
+	int out = 0;*/
 
 	//variable for main loop
-	int numSteps = 10000;
+	int numSteps = 1500;
 
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
@@ -78,10 +78,10 @@ int main(int argc, char* argv[]) {
 		//spatial rearrangment
 		//cout << "rearrange" << endl;
 		growing_Colony->update_locations();
-	
+	    //cout << "rearranged" << endl;
 
         //write data to txt file
-	    /*if(Ti%100 == 0){
+	    if(Ti%500 == 0){
             //open txt file for writing cell data
             Number = to_string(out);
             Filename = anim_folder + initial + Number + format;
@@ -89,10 +89,10 @@ int main(int argc, char* argv[]) {
             growing_Colony->write_data(myfile);
             myfile.close();
             out++;
-        }*/
+        }
         //make vtk files
         //on pause
-	if(Ti%1000 == 0){digits = ceil(log10(out +1));
+	/*if(Ti%100 == 0){digits = ceil(log10(out +1));
 		if(digits == 1 || digits == 0){
 			Number = "0000" + to_string(out);
 		}
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 		growing_Colony->print_vtk_file(ofs_anim);
 		ofs_anim.close();
 		out++;
-	    }
+	    }*/
     }
     int stop = clock();
 	cout << "Time: " << (stop-start) / double(CLOCKS_PER_SEC)*1000 << endl;

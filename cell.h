@@ -43,7 +43,8 @@ class Cell: public enable_shared_from_this<Cell>{
 		shared_ptr<Cell> curr_daughter;
 		shared_ptr<Cell> curr_mother;
 		bool is_bud;
-		Coord curr_force;
+		bool has_bud;
+        Coord curr_force;
 		Coord div_site1;
 		Coord div_site2;
 	
@@ -65,15 +66,19 @@ class Cell: public enable_shared_from_this<Cell>{
 		int get_rank() {return rank;}
         void set_daughter(shared_ptr<Cell> daughter);		
 		void set_mother(shared_ptr<Cell> mother);
-        void set_is_bud(bool bud_status);
+        void reset_is_bud();
+        void reset_has_bud();
         void grow_cell();
 		void update_cell_cycle();
 		void enter_mitosis();
 		void perform_budding();
 		void perform_mitosis();
-		void calc_forces();
-		void update_location(); 
-		void print_txt_file_format(ofstream& ofs);
+		void calc_forces_jonsson();
+        void calc_forces_chou();
+		void calc_forces_exponential();
+        void update_location(); 
+		double compute_indica();
+        void print_txt_file_format(ofstream& ofs);
         void print_cell_center(ofstream& ofs);	
 };
 
