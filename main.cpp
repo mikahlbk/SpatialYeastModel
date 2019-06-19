@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 	    //cout << "rearranged" << endl;
 
         //write data to txt file
-	    if(Ti%500 == 0){
+	    if(Ti%1000 == 0){
             //open txt file for writing cell data
             Number = to_string(out);
             Filename = anim_folder + initial + Number + format;

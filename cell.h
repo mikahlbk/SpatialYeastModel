@@ -76,6 +76,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		void calc_forces_jonsson();
         void calc_forces_chou();
 		void calc_forces_exponential();
+        void lennard_jones_potential();
         void update_location(); 
 		double compute_indica();
         void print_txt_file_format(ofstream& ofs);

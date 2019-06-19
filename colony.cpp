@@ -98,9 +98,10 @@ void Colony::update_locations(){
     //do{
         for(unsigned int i = 0; i < cells.size(); i++){
 	        //cells.at(i)->calc_forces_chou();
-            //cells.at(i)->calc_forces_jonsson();
-            cells.at(i)->calc_forces_exponential();
-	    }
+            cells.at(i)->calc_forces_jonsson();
+            //cells.at(i)->calc_forces_exponential();
+	       // cells.at(i)->lennard_jones_potential();
+        }
 
 	    for(unsigned int i = 0; i < cells.size(); i++){
 		    cells.at(i)->update_location();

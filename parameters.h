@@ -16,7 +16,9 @@
 //Simulation Constants
 
 //timestep
-const double dt = .1;
+const double dt = .01;
+
+const double LJ_EPS =.01;
 
 //These two growth parameters set the timescale
 const double k_g1 = .01;
@@ -45,7 +47,7 @@ const double k_spring = 1;
 //calibrated base don length of the adhesion force and also
 //used to define which cells are considered neighbors
 //to produce adhesion it should be set higher than k^cell-cell_r_frac
-const double k_neighbor = 1.1;
+const double k_neighbor = 5;
 
 //spring force between mother and daughter bud
 //updated during force calculation in code
@@ -59,12 +61,12 @@ const double k_repulsion_cell_cell = .9;
 const double k_adhesion_mother_bud = 1;
 
 //adhesion between unrelated cells
-const double k_adhesion_cell_cell = .5;
+const double k_adhesion_cell_cell = .03;
 
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
 
 //chou model params
-const double k_r = .9; 
-const double k_a = 1.1;
+const double k_r = 1; 
+const double k_a = .2;
 #endif
