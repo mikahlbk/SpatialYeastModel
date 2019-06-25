@@ -183,9 +183,9 @@ void Cell::calc_forces_chou(){
                 d_ij = (neighbor_loc-my_loc).length();
                 delta_d = my_radius + neighbor_radius - d_ij;
                 v_ij = (neighbor_loc-my_loc)/d_ij;
-                if(d_ij < my_radius+neighbor_radius){
-                    rep_force += v_ij*delta_d*k_r;
-                    adh_force += v_ij*delta_d*k_a*-1;
+                if(d_ij < (my_radius+neighbor_radius)){
+                    rep_force += v_ij*delta_d*k_r*-1;
+                    adh_force += v_ij*delta_d*k_a;
                 }
             }       
     }
@@ -211,25 +211,25 @@ void Cell::calc_forces_jonsson(){
 		    neighbor_radius = neighbor_cells.at(i)->get_radius();
 		    diff_len = (neighbor_loc - my_loc).length();
             diff_vec = (neighbor_loc - my_loc)/diff_len;
-            if(diff_len < k_neighbor*(my_radius + neighbor_radius)){
+            if(diff_len < (my_radius + neighbor_radius)){
                 if((this->is_bud)||(this->has_bud)){
                     if((neighbor_cells.at(i) == curr_daughter)){
                         //cout << "Cell rank " << this->rank << " has daughter " << this->curr_daughter->get_rank() << endl;
-                        rep_force += (diff_vec/diff_len)*(diff_len-(my_radius/(neighbor_radius+my_radius))*(my_radius+neighbor_radius))*k_spring*-1;
-                	    adh_force += (diff_vec/diff_len)*(diff_len-(my_radius/(neighbor_radius+my_radius))*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud*-1;
-                	}		
+                        rep_force += diff_vec*(diff_len-(my_radius/(my_radius + neighbor_radius))*(my_radius+neighbor_radius))*k_spring;
+                	    adh_force += diff_vec*(diff_len-(my_radius/(my_radius + neighbor_radius))*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
+                	}	
             	    else if((neighbor_cells.at(i) == curr_mother)){
                         //cout << "Cell rank " << rank << " has mother " << curr_mother->get_rank() << endl;
-                	    rep_force += (diff_vec/diff_len)*(diff_len-(neighbor_radius/(my_radius+neighbor_radius))*(neighbor_radius+my_radius))*k_spring*-1;
-	            		adh_force += (diff_vec/diff_len)*(diff_len -(neighbor_radius/(my_radius+neighbor_radius))*(neighbor_radius+my_radius))*k_spring*k_adhesion_mother_bud*-1;
-                	}
+                	    rep_force += diff_vec*(diff_len-(neighbor_radius/(my_radius+neighbor_radius))*(my_radius+neighbor_radius))*k_spring;
+	            	    adh_force += diff_vec*(diff_len-(neighbor_radius/(my_radius+neighbor_radius))*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
+                    }
                 }
                 else {
 		            //cout << "regular cell" << rank << endl;
-                    rep_force += diff_vec/diff_len*(diff_len - k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*-1;
-	                adh_force += diff_vec/diff_len*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_cell_cell*-1;
-                }   
-	        }   
+                    rep_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+                    adh_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_cell_cell;
+                }
+            }
 	    }	
     }	
 	this->curr_force = rep_force + adh_force;

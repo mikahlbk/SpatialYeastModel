@@ -47,7 +47,7 @@ const double k_spring = 1;
 //calibrated base don length of the adhesion force and also
 //used to define which cells are considered neighbors
 //to produce adhesion it should be set higher than k^cell-cell_r_frac
-const double k_neighbor = 5;
+const double k_neighbor = 1.1;
 
 //spring force between mother and daughter bud
 //updated during force calculation in code
@@ -55,13 +55,13 @@ const double k_neighbor = 5;
 
 //since cells are not infinitely hard spheres, some amount
 //of overlap is allowed
-const double k_repulsion_cell_cell = .9;
+const double k_repulsion_cell_cell = 1;
 
 //so that bud does not move away from mother
 const double k_adhesion_mother_bud = 1;
 
 //adhesion between unrelated cells
-const double k_adhesion_cell_cell = .03;
+const double k_adhesion_cell_cell = .05;
 
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
