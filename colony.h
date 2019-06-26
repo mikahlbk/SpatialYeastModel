@@ -49,7 +49,8 @@ class Colony: public enable_shared_from_this<Colony>{
         void perform_budding();
 		void perform_mitosis();
 		void update_locations();
-		void print_vtk_file(ofstream& ofs);
+		void update_protein_concentration();
+        void print_vtk_file(ofstream& ofs);
         void write_data(ofstream& ofs);
 };
 

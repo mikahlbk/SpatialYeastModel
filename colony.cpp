@@ -40,9 +40,9 @@ void Colony::make_founder_cell(){
 	auto new_cell = make_shared<Cell>(this_colony, rank, center, max_radius, init_radius);
 	update_Colony_Cell_Vec(new_cell);
     rank = cells.size();
-    auto new_cell_2 = make_shared<Cell>(this_colony,rank, center+Coord(2,2), max_radius, init_radius);
-    update_Colony_Cell_Vec(new_cell_2);
-    return;
+    //auto new_cell_2 = make_shared<Cell>(this_colony,rank, center+Coord(2,2), max_radius, init_radius);
+    //update_Colony_Cell_Vec(new_cell_2);
+    //return;
 }
 
 void Colony::get_Cells(vector<shared_ptr<Cell>>& new_cells){
@@ -90,39 +90,28 @@ void Colony::perform_mitosis(){
     }
 	return;
 }
-
+void Colony::update_protein_concentration(){
+    for(unsigned int i=0; i< cells.size(); i++){
+        //cout << "Protein before" << cells.at(i)->get_protein_conc() << endl;
+        cells.at(i)->compute_protein_concentration();
+        //cout << "Protein after" << cells.at(i)->get_protein_conc() << endl;
+    }
+    return;
+}
 void Colony::update_locations(){
 	double indica = 0;
     int counter = 0;
     double largest_value;
-    //do{
-        for(unsigned int i = 0; i < cells.size(); i++){
-	        //cells.at(i)->calc_forces_chou();
-            cells.at(i)->calc_forces_jonsson();
-            //cells.at(i)->calc_forces_exponential();
-	       // cells.at(i)->lennard_jones_potential();
-        }
-
-	    for(unsigned int i = 0; i < cells.size(); i++){
-		    cells.at(i)->update_location();
-	    }
-        
-        //for(unsigned int i=0; i< cells.size(); i++){
-          //  largest_value = cells.at(i)->compute_indica();
-            //if(largest_value > indica){
-              //  indica = largest_value;
-            //}
-            //cout << "Cell: " << i << "current value: " << indica << endl;        
-           // counter++;
-            //cout << "Counter" << counter << endl;
-            //cout << "Indica" << indica << endl;
-            //if(counter > 500){
-              //  cout << "infinite" << endl;
-                //exit(0);
-            //}
-       // }
-   // }while(counter > 500);
-   return;
+    for(unsigned int i = 0; i < cells.size(); i++){
+	    //cells.at(i)->calc_forces_chou();
+        cells.at(i)->calc_forces_jonsson();
+        //cells.at(i)->calc_forces_exponential();
+	    // cells.at(i)->lennard_jones_potential();
+    }
+    for(unsigned int i = 0; i < cells.size(); i++){
+	    cells.at(i)->update_location();
+	}
+    return;
 }
 void Colony::write_data(ofstream& ofs){
     ofs << cells.size() << endl;

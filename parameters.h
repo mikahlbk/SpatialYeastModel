@@ -18,6 +18,8 @@
 //timestep
 const double dt = .01;
 
+const double pi = 3.14;
+
 const double LJ_EPS =.01;
 
 //These two growth parameters set the timescale
@@ -58,15 +60,24 @@ const double k_neighbor = 1.1;
 const double k_repulsion_cell_cell = 1;
 
 //so that bud does not move away from mother
-const double k_adhesion_mother_bud = 1;
+const double k_adhesion_mother_bud = .05;
 
 //adhesion between unrelated cells
 const double k_adhesion_cell_cell = .05;
 
+
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
 
+//division param
+const double k_axial_frac = .5;
 //chou model params
 const double k_r = 1; 
 const double k_a = .2;
+
+//signaling params
+const double P_0 = .1;
+const double r_LOGISTIC = .005;
+const double K_LOGISTIC = 50;
+
 #endif

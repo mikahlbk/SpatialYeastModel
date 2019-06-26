@@ -40,31 +40,34 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool G2;
 		bool M;
 		vector<shared_ptr<Cell>> daughters;
-		shared_ptr<Cell> curr_daughter;
-		shared_ptr<Cell> curr_mother;
+		shared_ptr<Cell> curr_bud;
+		shared_ptr<Cell> mother;
 		bool is_bud;
 		bool has_bud;
         Coord curr_force;
-		Coord div_site1;
-		Coord div_site2;
+		double curr_protein;
+        double div_site1;
+		double div_site2;
 	
 	public:
 		//Constructor
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius);
-        Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother);		
+        Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site);		
 		Coord get_Cell_Center(){return cell_center;}
-		shared_ptr<Cell> get_mother(){return curr_mother;}
-		shared_ptr<Cell> get_daughter() {return curr_daughter;}
+		shared_ptr<Cell> get_mother(){return mother;}
+		shared_ptr<Cell> get_bud() {return curr_bud;}
 		void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);
 		bool get_G1() {return G1;}
 		bool get_G2() {return G2;}
 		bool get_S() {return S;}
 		bool get_M() {return M;}
-		double get_radius() {return curr_radius;}
+		double get_protein_conc(){return curr_protein;}
+        double get_radius() {return curr_radius;}
 		double get_max_radius() {return max_radius;}
 		shared_ptr<Colony> get_Colony() {return my_colony;}
 		int get_rank() {return rank;}
-        void set_daughter(shared_ptr<Cell> daughter);		
+        void add_daughter(shared_ptr<Cell> daughter);
+        void set_bud(shared_ptr<Cell> bud);
 		void set_mother(shared_ptr<Cell> mother);
         void reset_is_bud();
         void reset_has_bud();
@@ -78,7 +81,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		void calc_forces_exponential();
         void lennard_jones_potential();
         void update_location(); 
-		double compute_indica();
+        void compute_protein_concentration();
         void print_txt_file_format(ofstream& ofs);
         void print_cell_center(ofstream& ofs);	
 };

@@ -24,7 +24,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     
-    //reads in name of folder to put out put
+    //reads in name of folder to store output
     string anim_folder = argv[1];
 
     //keeps track of simulation time
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     
     //make colony object
 	auto growing_Colony = make_shared<Colony>();
-	//cout << "Made colony" << endl;
+	//cout << "Made Colony" << endl;
 	growing_Colony->make_founder_cell();
 	//cout << "Made founder cell" << endl;
 	
@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     string Number;
     string Filename;
 
+    //not in use
     //some variables for writing vtk files
 	/*int digits;
 	string format = ".vtk";
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
 	int out = 0;*/
 
 	//variable for main loop
-	int numSteps = 1500;
+	int numSteps = 2000;
 
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
@@ -79,6 +80,10 @@ int main(int argc, char* argv[]) {
 		//cout << "rearrange" << endl;
 		growing_Colony->update_locations();
 	    //cout << "rearranged" << endl;
+        
+        //compute protein concentration
+        //cout << "Protein Conc" << endl;
+        growing_Colony->update_protein_concentration();
 
         //write data to txt file
 	    if(Ti%1000 == 0){
@@ -90,35 +95,34 @@ int main(int argc, char* argv[]) {
             myfile.close();
             out++;
         }
+        
         //make vtk files
-        //on pause
-	/*if(Ti%100 == 0){digits = ceil(log10(out +1));
-		if(digits == 1 || digits == 0){
-			Number = "0000" + to_string(out);
-		}
-		else if(digits == 2){
-			Number = "000" + to_string(out);
-		}
-		else if(digits == 3){
-			Number = "00" + to_string(out);
-		}
-		else if(digits == 4){
-			Number = "0" + to_string(out);
-		}
+	    /*if(Ti%100 == 0){digits = ceil(log10(out +1));
+		    if(digits == 1 || digits == 0){
+			    Number = "0000" + to_string(out);
+		    }
+		    else if(digits == 2){
+			    Number = "000" + to_string(out);
+	    	}
+		    else if(digits == 3){
+			    Number = "00" + to_string(out);
+		    }
+		    else if(digits == 4){
+			    Number = "0" + to_string(out);
+		    }
 		
-		Filename = anim_folder + initial + Number + format;
+		    Filename = anim_folder + initial + Number + format;
 		
-		ofs_anim.open(Filename.c_str());
-		growing_Colony->print_vtk_file(ofs_anim);
-		ofs_anim.close();
-		out++;
+		    ofs_anim.open(Filename.c_str());
+		    growing_Colony->print_vtk_file(ofs_anim);
+		    ofs_anim.close();
+		    out++;
 	    }*/
     }
     int stop = clock();
 	cout << "Time: " << (stop-start) / double(CLOCKS_PER_SEC)*1000 << endl;
-	//Need some kind of component to save
-	//data over each run????
-
+	//Need to add way to store data over multiple runs
+    
     return 0;
 }
 
