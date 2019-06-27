@@ -234,19 +234,30 @@ void Cell::calc_forces_jonsson(){
 		    diff_len = (neighbor_loc - my_loc).length();
             diff_vec = (neighbor_loc - my_loc)/diff_len;
             if(diff_len < k_neighbor*(my_radius + neighbor_radius)){
-                if(this->has_bud){
-                    if((neighbor_cells.at(i) == curr_bud)){
+                if((neighbor_cells.at(i) == curr_bud)){
+                    if(this->has_bud){
                         //cout << "Cell rank " << this->rank << " has daughter " << this->curr_bud->get_rank() << endl;
                         rep_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
                 	    adh_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
                     }
-                }
-                else if(this->is_bud){
-            	    if((neighbor_cells.at(i) == mother)){
-                        //cout << "Cell rank " << rank << " has mother " << mother->get_rank() << endl;
-                	    rep_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
-	            	    adh_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
+                    else{
+                         //cout << "regular cell" << rank << endl;
+                        rep_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+                        adh_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_cell_cell;
                     }
+                }
+                else if((neighbor_cells.at(i) == mother)){
+                       if(this->is_bud){
+                            //cout << "Cell rank " << rank << " has mother " << mother->get_rank() << endl;
+                	        rep_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+	            	        adh_force += diff_vec*(diff_len-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;  
+                       }
+                       else {
+                             //cout << "regular cell" << rank << endl;
+                            rep_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring;
+                            adh_force += diff_vec*(diff_len -k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_daughter;
+               
+                       }
                 }
                 else {
 		            //cout << "regular cell" << rank << endl;
