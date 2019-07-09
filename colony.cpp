@@ -30,18 +30,17 @@ void Colony::make_founder_cell(){
 	//make founder cell
     //variables needed to 
     //feed to cell constructor
-	double max_radius;
+	double new_max_radius;
 	double init_radius;
 	Coord center;
 	int rank = 0;
-	max_radius = static_cast<double>(rand() % 3 + 99)/(double)(100.0);
-	init_radius = .8;
+	new_max_radius = static_cast<double>(rand() % 3 + 99)/(double)(100.0)*radius_average;
+	init_radius = .5;
 	center = Coord(0,0);
-	auto new_cell = make_shared<Cell>(this_colony, rank, center, max_radius, init_radius);
+	auto new_cell = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
 	update_Colony_Cell_Vec(new_cell);
     rank = cells.size();
-    //auto new_cell_2 = make_shared<Cell>(this_colony,rank, center+Coord(2,2), max_radius, init_radius);
-    //update_Colony_Cell_Vec(new_cell_2);
+    new_cell->set_mother(new_cell);
     //return;
 }
 
@@ -99,18 +98,28 @@ void Colony::update_protein_concentration(){
     return;
 }
 void Colony::update_locations(){
-	double indica = 0;
-    int counter = 0;
-    double largest_value;
-    for(unsigned int i = 0; i < cells.size(); i++){
-	    cells.at(i)->calc_forces_chou();
-        //cells.at(i)->calc_forces_jonsson();
-        //cells.at(i)->calc_forces_exponential();
-	    // cells.at(i)->lennard_jones_potential();
-    }
-    for(unsigned int i = 0; i < cells.size(); i++){
-	    cells.at(i)->update_location();
-	}
+    double indicator = 0;
+    double closest_center;
+    
+    do{  
+        //cout << cells.size() << endl;
+        for(unsigned int i = 0; i < cells.size(); i++){
+	        //cells.at(i)->calc_forces_chou();
+            cells.at(i)->calc_forces_jonsson();
+            //cells.at(i)->calc_forces_exponential();
+	        //cells.at(i)->lennard_jones_potential();
+        }
+        for(unsigned int i = 0; i < cells.size(); i++){
+	        cells.at(i)->update_location();
+	    }
+        //compute new distances between cells
+        //for(unsigned int i = 0; i<cells.size();i++){
+           // closest_center = cells.at(i)->calc_closest_center();
+            //if(closest_center < indicator){
+                indicator++;// closest_center;
+            //}
+        //}
+    }while(indicator < 1000);
     return;
 }
 void Colony::write_data(ofstream& ofs){

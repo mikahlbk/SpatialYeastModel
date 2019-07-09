@@ -56,19 +56,20 @@ int main(int argc, char* argv[]) {
 	int out = 0;*/
 
 	//variable for main loop
-	int numSteps = 2000;
+	int numSteps = 1000;
 
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
 		
-		//growth
+		//cout << "Time: " << Ti << endl;
+        //growth
 		growing_Colony->grow_cells();
 		
 		//cell_cycle
 	    //cout << "growth" << endl;
         growing_Colony->update_cell_cycles();
 
-		//budding
+    	//budding
         //cout<< "budding" << endl;
 		growing_Colony->perform_budding();
 

@@ -48,11 +48,12 @@ class Cell: public enable_shared_from_this<Cell>{
 		double curr_protein;
         double div_site1;
 		double div_site2;
+        vector<shared_ptr<Cell>> lineage;
 	
 	public:
 		//Constructor
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius);
-        Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site);		
+        Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage);		
 		Coord get_Cell_Center(){return cell_center;}
 		shared_ptr<Cell> get_mother(){return mother;}
 		shared_ptr<Cell> get_bud() {return curr_bud;}
@@ -61,12 +62,15 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool get_G2() {return G2;}
 		bool get_S() {return S;}
 		bool get_M() {return M;}
+        void get_lineage_vec(vector<shared_ptr<Cell>>& lineage_cells);
 		double get_protein_conc(){return curr_protein;}
         double get_radius() {return curr_radius;}
 		double get_max_radius() {return max_radius;}
 		shared_ptr<Colony> get_Colony() {return my_colony;}
 		int get_rank() {return rank;}
         void add_daughter(shared_ptr<Cell> daughter);
+        int get_generation();
+        double calc_closest_center();
         void set_bud(shared_ptr<Cell> bud);
 		void set_mother(shared_ptr<Cell> mother);
         void reset_is_bud();
