@@ -70,14 +70,22 @@ const double k_adhesion_cell_cell = .1;
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
 
 //division param
-const double k_axial_frac = 0;
+const double k_axial_frac = .5;
 //chou model params
 const double k_r = 1; 
 const double k_a = .2;
 
 //signaling params
-const double P_0 = .1;
-const double r_LOGISTIC = .005;
-const double K_LOGISTIC = 50;
+const double P_0 = 50;
+const double r_LOGISTIC = .0008;
+const double K_LOGISTIC = 100;
+const double A_LOGISTIC = 20;
+//signaling params DNPM
+const double alpha = .0154;
+const double beta = 12;
+const double Gamma = .00008;
+const double mu = .0077;
+const int n_0 = 1;
+const int array_size = 4;
 
 #endif

@@ -24,17 +24,18 @@
 #include "parameters.h"
 #include "coord.h"
 #include "cell.h"
-
+#include "mesh.h"
 //******************************************
 //COLONY Class Declaration
 
 class Colony: public enable_shared_from_this<Colony>{
 	private:
-		vector<shared_ptr<Cell> > cells;
+		shared_ptr<Mesh> my_mesh;
+		vector<shared_ptr<Cell>> cells;
 		
 	public:
 		//constructor
-		Colony();
+		Colony(shared_ptr<Mesh> my_mesh);
         //make founder cell
         void make_founder_cell();
 		
@@ -42,16 +43,17 @@ class Colony: public enable_shared_from_this<Colony>{
 		void get_Cells(vector<shared_ptr<Cell>>& new_cells);
 		void update_Colony_Cell_Vec(shared_ptr<Cell> new_cell);
 		int get_Num_Cells();
-
+		shared_ptr<Mesh> get_mesh(){return my_mesh;}
 		//cell actions
+		void find_bin();
 		void grow_cells();
 		void update_cell_cycles();
-        void perform_budding();
-		void perform_mitosis();
+        	void perform_budding(int Ti);
+		void perform_mitosis(int Ti);
 		void update_locations();
 		void update_protein_concentration();
-        void print_vtk_file(ofstream& ofs);
-        void write_data(ofstream& ofs);
+        	void print_vtk_file(ofstream& ofs);
+        	void write_data(ofstream& ofs);
 };
 
 //*********************************************
