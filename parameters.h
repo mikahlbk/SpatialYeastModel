@@ -88,4 +88,6 @@ const double mu = .0077;
 const int n_0 = 1;
 const int array_size = 4;
 
+const double THETA = .75;
+
 #endif

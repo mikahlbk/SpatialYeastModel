@@ -72,6 +72,8 @@ int main(int argc, char* argv[]) {
 	//loop for time steps
 	for (int Ti = 0; Ti*dt < numSteps; Ti++) {
 		
+		//here I will call the make sector function
+		
 		//cout << "Time: " << Ti << endl;
         	growing_Colony->find_bin();
 		//growth
@@ -94,12 +96,13 @@ int main(int argc, char* argv[]) {
 		//cout << "rearrange" << endl;
 		growing_Colony->update_locations();
 	    	//cout << "rearranged" << endl;
-        
+       
         	//compute protein concentration
         	//cout << "Protein Conc" << endl;
         	growing_Colony->update_protein_concentration();
 
         	//write data to txt file
+		//change to smaller number if need to see stuff more frequently 
 	    	if(Ti%500 == 0){
             		//open txt file for writing cell data
             		Number = to_string(out);
