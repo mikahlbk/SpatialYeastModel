@@ -10,8 +10,6 @@
 #include <ctime>
 #include <cstdio>
 #include <memory>
-#include <boost/array.hpp>
-#include <boost/numeric/odeint.hpp>
 #include "parameters.h"
 #include "coord.h"
 #include "cell.h"

@@ -19,11 +19,8 @@ class Colony;
 #include <iostream>
 #include <cstdio>
 #include <memory>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
 #include "parameters.h"
 #include "coord.h"
-typedef boost::array<double,array_size> state_type;
 //***********************************************************
 // Cell Class Declaration
 
@@ -92,7 +89,6 @@ class Cell: public enable_shared_from_this<Cell>{
 		void calc_forces_exponential();
         	void lennard_jones_potential();
         	void update_location();
-		void dnpm(const state_type &x, state_type& dxdt, double t);
 		void compute_protein_conc_DNPM();
         	void compute_protein_concentration();
         	void print_txt_file_format(ofstream& ofs);

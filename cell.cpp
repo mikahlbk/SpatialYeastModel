@@ -11,13 +11,11 @@
 #include <cstdio>
 #include <memory>
 #include <boost/array.hpp>
-#include <boost/numeric/odeint.hpp>
 #include "parameters.h"
 #include "coord.h"
 #include "cell.h"
 #include "colony.h"
 using namespace std;
-using namespace boost::numeric::odeint;
 //****************************************
 //Public Member Functions for Cell.cpp
 
@@ -427,7 +425,7 @@ void Cell::update_location(){
     cell_center = cell_center + curr_force*dt;
 	return;
 }
-void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
+/*void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
 	int fsum = 0;
 	int size_x = x.size()-1;
 	for(unsigned int i = 1; i<size_x; i++){
@@ -445,7 +443,7 @@ void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
 	}
 	return;
 
-}
+}*/
 /*void Cell::compute_protein_conc_DNPM(){
 	state_type x = {10, 1, 1, 1};
 	integrate(ref(*this), x, 0,10,.1);
