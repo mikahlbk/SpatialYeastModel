@@ -68,8 +68,9 @@ const double k_adhesion_cell_cell = .1;
 
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
-
-//division param
+const double POISSON = .4;
+const double ELASTIC_MOD = 45;
+const double ADHESION_STRENGTH = 12;
 const double k_axial_frac = .5;
 //chou model params
 const double k_r = 1; 

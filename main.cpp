@@ -35,9 +35,9 @@ int main(int argc, char* argv[]) {
     //make mesh
     //cout << " make mesh " << endl;
     auto mesh_for_bins = make_shared<Mesh>();
-    int start_1 = -40;
-    int end = 40;
-    double increment = 2.0;
+    int start_1 = -100;
+    int end = 100;
+    double increment = 10.0;
     //cout << " make bins " << endl;
     mesh_for_bins->make_mesh_pts(start_1,end,increment);
     //cout << "make neighbors" << endl;
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 
         	//write data to txt file
 		//change to smaller number if need to see stuff more frequently 
-	    	if(Ti%500 == 0){
+	    	if(Ti%50 == 0){
             		//open txt file for writing cell data
             		Number = to_string(out);
            		Filename = anim_folder + initial + Number + format;

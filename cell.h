@@ -84,6 +84,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		void enter_mitosis();
 		void perform_budding(int Ti);
 		void perform_mitosis(int Ti);
+		void calc_forces_Hertz();
 		void calc_forces_jonsson();
         	void calc_forces_chou();
 		void calc_forces_exponential();

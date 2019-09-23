@@ -35,13 +35,35 @@ void Colony::make_founder_cell(){
 	double init_radius;
 	Coord center;
 	int rank = 0;
-	new_max_radius = static_cast<double>(rand() % 3 + 99)/(double)(100.0)*radius_average;
+	new_max_radius =static_cast<double>(rand() % 3 + 99)/(double)(100.0)*radius_average;
 	init_radius = .2;
 	center = Coord(0,0);
 	auto new_cell = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
 	update_Colony_Cell_Vec(new_cell);
+    	rank = cells.size();
+    	new_cell->set_mother(new_cell);
+    /*center = Coord(.5,0);
+	auto new_cell2 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
+	update_Colony_Cell_Vec(new_cell2);
     rank = cells.size();
     new_cell->set_mother(new_cell);
+    center = Coord(-.5,0);
+	auto new_cell3 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
+	update_Colony_Cell_Vec(new_cell3);
+    rank = cells.size();
+    new_cell->set_mother(new_cell);
+	center = Coord(0,2);
+	auto new_cell4 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
+	update_Colony_Cell_Vec(new_cell4);
+    rank = cells.size();
+    new_cell->set_mother(new_cell);
+    center = Coord(0,-2);
+	auto new_cell5 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
+	update_Colony_Cell_Vec(new_cell5);
+    rank = cells.size();
+    new_cell->set_mother(new_cell);*/
+
+
     //return;
 }
 
@@ -121,7 +143,8 @@ void Colony::update_locations(){
 		cout <<"cell: "<< i << endl;
 		// cells.at(i)->calc_forces_chou();
 		//cout << "update forces" << endl;
-		cells.at(i)->calc_forces_jonsson();
+		cells.at(i)->calc_forces_Hertz();
+		//cells.at(i)->calc_forces_jonsson();
 		//cout << "forces updated" << endl;
 		//cells.at(i)->calc_forces_exponential();
 	        //cells.at(i)->lennard_jones_potential();

@@ -264,14 +264,72 @@ void Cell::perform_mitosis(int Ti){
     //daughter remains G1 and mother gets set to G1
 	return;
 }
+void Cell::calc_forces_Hertz(){
+    //functional for potential energy between cell i and j
+    //to get force on cell i from node j differentiate wrt node i
+    //V_ij = V_ij^attractive + V_ij^repulsive
+    //where the repulsive contribution is given by
+    //V_ij^repulsive = (R_i + R_j - d_ij)^5/2*1/5*E_ij^-1*sqrt(R_i*R_j/R_i + R_j)
+    //here E_ij^-1 is defined as E_ij^-1 = 3/2(1-\sigma^C)/E^C
+    //this assumes that E_i and E_j the elastic moduli of each cell as well as
+    //\sigma_i and \sigma_j the Poisson ratios of each cell are the same
+    //to take away this assumption see page 177 of Single Cell Based Models in
+    //Biology and Medicine for more general form of function
+    //V_ij^attractive = -n_molA_ij/A_cW_s
+    //where A_ij is the contact area of cells
+    //A_ij = 2*R_j*(1-d_ij/R_i + R_j)
+    //A_c is the surface area of the larger cell 2*pi*R_i
+    //n_mol is the total number of adhesion molecules at the
+    //cell surface and Ws is the adhesive energy of a single bond
+    double d_ij;
+    Coord v_ij;
+    vector<shared_ptr<Cell>> neighbor_cells;
+    //this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id, neighbor_cells);
+    this->my_colony->get_Cells(neighbor_cells);
+    Coord my_loc = cell_center;
+    double my_radius = curr_radius;
+    Coord neighbor_loc;
+    double neighbor_radius;
+    Coord rep_force;
+    Coord adh_force;
+    double E_ij_inverse = ELASTIC_MOD/(2*(1-POISSON));//(3.0/2.0)*(1-POISSON)/ELASTIC_MOD;
+    cout << "E_ij Inverse" << E_ij_inverse << endl;
+    double sqrt_term;
+    shared_ptr<Cell> this_cell = shared_from_this();
+    for(unsigned int i = 0; i< neighbor_cells.size();i++){
+	if(neighbor_cells.at(i) != this_cell){
+		neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
+		neighbor_radius = neighbor_cells.at(i)->get_radius();
+		cout << "My radius " << my_radius << " Neighbor radius " << neighbor_radius << endl;
+		d_ij = (my_loc-neighbor_loc).length();
+		cout << "D_ij " << d_ij << endl;
+		v_ij = (my_loc - neighbor_loc);
+		cout << "V_ij" << v_ij << endl; //->get_X() << v_ij->get_Y()<< endl;
+		sqrt_term = sqrt((my_radius*neighbor_radius)/(my_radius + neighbor_radius));
+		cout << "sqrt term " << sqrt_term << endl;
+		cout << "Radius sum" << my_radius + neighbor_radius - d_ij << endl;
+		if(my_radius + neighbor_radius - d_ij >= 0){
+		rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
+		cout << "rep_force" << rep_force << endl;
+		}
+		if((my_radius + neighbor_radius - d_ij > -.5) && (my_radius + neighbor_radius - d_ij < .5)){ 
+		adh_force += v_ij*1*3.14*my_radius*neighbor_radius*(1-d_ij/(my_radius + neighbor_radius))/(2*3.14*neighbor_radius)*8;//ADHESION_STRENGTH*(my_radius*neighbor_radius)/(my_radius+neighbor_radius);
+		}
+	}
+     }
+     cout << "Rep_force" << rep_force << endl;
+     this->curr_force = rep_force + adh_force;
+     return;
+}
+
 void Cell::calc_forces_chou(){
-    double d_ij; 
+    double d_ij;
     double delta_d;
     Coord v_ij;
     vector<shared_ptr<Cell>> neighbor_cells;
-    this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id,neighbor_cells);
+    //this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id,neighbor_cells);
 	
-    //my_colony->get_Cells(neighbor_cells);
+    my_colony->get_Cells(neighbor_cells);
     Coord my_loc = cell_center;
     double my_radius = curr_radius;
     Coord neighbor_loc;
@@ -313,7 +371,7 @@ void Cell::calc_forces_jonsson(){
 	Coord diff_vec;
     double diff_len;
     //cout << "for loop" << endl;
-    for(unsigned int i = 0; i < neighbor_cells.size(); i++){
+    for(unsigned int i = 0; i < neighbor_cells.size(); i++)
 		if(neighbor_cells.at(i)!=this_cell){
             neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
 		    neighbor_radius = neighbor_cells.at(i)->get_radius();
@@ -353,7 +411,7 @@ void Cell::calc_forces_jonsson(){
            }
 
 	    }	
-    }	
+ 	
 	this->curr_force = rep_force + adh_force;
 	//cout << curr_force << endl;
 	return;
