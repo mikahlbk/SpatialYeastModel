@@ -57,7 +57,7 @@ const double k_neighbor = 1.1;
 
 //since cells are not infinitely hard spheres, some amount
 //of overlap is allowed
-const double k_repulsion_cell_cell = .9;
+const double k_repulsion_cell_cell = .8;
 
 //so that bud does not move away from mother
 const double k_adhesion_mother_bud = 1;
@@ -90,5 +90,5 @@ const int n_0 = 1;
 const int array_size = 4;
 
 const double THETA = .75;
-
+const bool ADHESION_ON = false;
 #endif

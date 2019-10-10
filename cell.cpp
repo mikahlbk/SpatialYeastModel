@@ -202,18 +202,18 @@ void Cell::perform_budding(int Ti){
     int new_rank = this_colony->get_Num_Cells();
     double init_radius = .2;//this->curr_radius*.2;
     double division_site;
-    if(rand() % 100 < k_axial_frac*100){
+    //if(rand() % 100 < k_axial_frac*100){
         //axial same
-        division_site = this->div_site2;
-    }
-    else{
+        //division_site = this->div_site2;
+    //}
+    //else{
             //polar opposite
             division_site = this->div_site2 + pi;
-    }
+    //}
     do{
         //move a little
         division_site = division_site + .01;
-    }while((division_site == div_site2)&&(division_site == div_site1));
+    }while((division_site == div_site2)||(division_site == div_site1));
     this->div_site1 = this->div_site2;
     this->div_site2 = division_site;
     double new_max_radius = static_cast<double>(rand()%3 + 99)/(double)(100.0)*radius_average; 
@@ -293,31 +293,69 @@ void Cell::calc_forces_Hertz(){
     Coord rep_force;
     Coord adh_force;
     double E_ij_inverse = ELASTIC_MOD/(2*(1-POISSON));//(3.0/2.0)*(1-POISSON)/ELASTIC_MOD;
-    cout << "E_ij Inverse" << E_ij_inverse << endl;
+    //cout << "E_ij Inverse" << E_ij_inverse << endl;
     double sqrt_term;
     shared_ptr<Cell> this_cell = shared_from_this();
     for(unsigned int i = 0; i< neighbor_cells.size();i++){
 	if(neighbor_cells.at(i) != this_cell){
 		neighbor_loc = neighbor_cells.at(i)->get_Cell_Center();
 		neighbor_radius = neighbor_cells.at(i)->get_radius();
-		cout << "My radius " << my_radius << " Neighbor radius " << neighbor_radius << endl;
+		//cout << "My radius " << my_radius << " Neighbor radius " << neighbor_radius << endl;
 		d_ij = (my_loc-neighbor_loc).length();
-		cout << "D_ij " << d_ij << endl;
+		//cout << "D_ij " << d_ij << endl;
 		v_ij = (my_loc - neighbor_loc);
-		cout << "V_ij" << v_ij << endl; //->get_X() << v_ij->get_Y()<< endl;
+		//cout << "V_ij" << v_ij << endl; //->get_X() << v_ij->get_Y()<< endl;
 		sqrt_term = sqrt((my_radius*neighbor_radius)/(my_radius + neighbor_radius));
-		cout << "sqrt term " << sqrt_term << endl;
-		cout << "Radius sum" << my_radius + neighbor_radius - d_ij << endl;
-		if(my_radius + neighbor_radius - d_ij >= 0){
-		rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
-		cout << "rep_force" << rep_force << endl;
+		//cout << "sqrt term " << sqrt_term << endl;
+		//cout << "Radius sum" << my_radius + neighbor_radius - d_ij << endl;
+		if(ADHESION_ON){
+			//ADHESION_ON IS A BOOLEAN IN PARAMETERS FILE
+			//turns in adhesion between mother and bud
+			if((neighbor_cells.at(i) == curr_bud)){
+                		if(this->has_bud){
+                        		//cout << "Cell rank " << this->rank << " has daughter " << this->curr_bud->get_rank() << endl;
+                        		adh_force += v_ij*-1*(d_ij-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;
+                    		}
+                    		else{
+					if(my_radius + neighbor_radius - d_ij >= 0){
+						rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
+						//cout << "rep_force" << rep_force << endl;
+					}
+				}
+			}
+			else if((neighbor_cells.at(i) == mother)){
+                       		if(this->is_bud){
+                        		adh_force += v_ij*-1*(d_ij-k_repulsion_cell_cell*(my_radius+neighbor_radius))*k_spring*k_adhesion_mother_bud;  
+                       		}
+                       		else {
+                             		//cout << "regular cell" << rank << endl;
+                       			if(my_radius + neighbor_radius - d_ij >= 0){
+						rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
+						//cout << "rep_force" << rep_force << endl;
+					}
+				}
+			}
+			else{
+				if(my_radius + neighbor_radius - d_ij >= 0){
+					rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
+					//cout << "rep_force" << rep_force << endl;
+				}
+			}	
 		}
-		if((my_radius + neighbor_radius - d_ij > -.5) && (my_radius + neighbor_radius - d_ij < .5)){ 
-		adh_force += v_ij*1*3.14*my_radius*neighbor_radius*(1-d_ij/(my_radius + neighbor_radius))/(2*3.14*neighbor_radius)*8;//ADHESION_STRENGTH*(my_radius*neighbor_radius)/(my_radius+neighbor_radius);
+		else{
+			if(my_radius + neighbor_radius - d_ij >= 0){
+				rep_force +=v_ij*4.0/3.0*E_ij_inverse*sqrt_term*pow(my_radius+neighbor_radius -d_ij,1.5);//(1.0/5.0)*E_ij_inverse*sqrt_term*(5.0/2.0)*pow((my_radius + neighbor_radius - d_ij),1.5)*(1/d_ij);
+				//cout << "rep_force" << rep_force << endl;
+			}
 		}
+		
+	
+		//if((my_radius + neighbor_radius - d_ij > -.5) && (my_radius + neighbor_radius - d_ij < .5)){ 
+		//adh_force += v_ij*1*3.14*my_radius*neighbor_radius*(1-d_ij/(my_radius + neighbor_radius))/(2*3.14*neighbor_radius)*8;//ADHESION_STRENGTH*(my_radius*neighbor_radius)/(my_radius+neighbor_radius);
+		//}
 	}
      }
-     cout << "Rep_force" << rep_force << endl;
+     //cout << "Rep_force" << rep_force << endl;
      this->curr_force = rep_force + adh_force;
      return;
 }

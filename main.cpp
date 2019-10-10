@@ -74,36 +74,36 @@ int main(int argc, char* argv[]) {
 		
 		//here I will call the make sector function
 		
-		//cout << "Time: " << Ti << endl;
+		cout << "Time: " << Ti << endl;
         	growing_Colony->find_bin();
 		//growth
-		//cout << "grow" << endl;
+		cout << "grow" << endl;
 		growing_Colony->grow_cells();
 		
 		//cell_cycle
-	    	//cout << "cell cycle" << endl;
+	    	cout << "cell cycle" << endl;
         	growing_Colony->update_cell_cycles();
 
     		//budding
-        	//cout<< "budding" << endl;
+        	cout<< "budding" << endl;
 		growing_Colony->perform_budding(Ti);
 
 		//remove buds that are big enough
-        	//cout << "mitosis" << endl;
+        	cout << "mitosis" << endl;
 		growing_Colony->perform_mitosis(Ti);
 
 		//spatial rearrangment
-		//cout << "rearrange" << endl;
+		cout << "rearrange" << endl;
 		growing_Colony->update_locations();
 	    	//cout << "rearranged" << endl;
        
         	//compute protein concentration
-        	//cout << "Protein Conc" << endl;
+        	cout << "Protein Conc" << endl;
         	growing_Colony->update_protein_concentration();
 
         	//write data to txt file
 		//change to smaller number if need to see stuff more frequently 
-	    	if(Ti%50 == 0){
+	    	if(Ti%100 == 0){
             		//open txt file for writing cell data
             		Number = to_string(out);
            		Filename = anim_folder + initial + Number + format;
