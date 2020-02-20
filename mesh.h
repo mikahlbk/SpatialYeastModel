@@ -26,15 +26,15 @@
 
 class Mesh: public enable_shared_from_this<Mesh>{
 	private:
-		vector<shared_ptr<Mesh_Pt>> mesh_pts;
+		vector<pair<shared_ptr<Mesh_Pt>,int>> mesh_pts;
 	public:
 		//constructor
 		Mesh();
-		void make_mesh_pts(int start, int end, double increment);
+		void make_mesh_pts(double x_start, double y_start, int num_buckets, double increment);
+		void update_mesh_pts_vec(shared_ptr<Mesh_Pt>& new_mesh_pt, int index);
 		void get_mesh_pts_vec(vector<shared_ptr<Mesh_Pt>>& mesh_points);
 		void assign_neighbors();
-		void update_mesh_pts_vec(shared_ptr<Mesh_Pt>& new_mesh_pt);
-		void give_cell_to_bin(int& index, shared_ptr<Cell>& new_cell);
+		void assign_cell_to_bin(int& index, shared_ptr<Cell>& new_cell);
 		void get_cells_from_bin(int& index, vector<shared_ptr<Cell>>& neighbors);
 };
 

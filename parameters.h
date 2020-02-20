@@ -15,12 +15,31 @@
 //***********************************
 //Simulation Constants
 
-//timestep
-const double dt = .1;
+//time in minutes
+const int end_time = 1400;
+const int NUM_STEPS = 1000000;//100000;
 
+//timestep
+const double dt = (double)end_time/(double)NUM_STEPS;
+
+//frequency of output for visualization
+const int OUTPUT_FREQ = 10000;
+
+//important constants 
 const double pi = 3.14;
 
-const double LJ_EPS =.01;
+//Cell parameters
+const double G_one =  45.0;
+const double average_radius =  2.775;//microns
+const double average_G1_daughter = 75.0;
+//average length of G1 for daughter cell is 75 minutes
+//45 minutes is how long it stays on mother
+//this means size of daughter at division should be ~2.6 microns
+//not needed-const double average_growth_rate = average_radius/average_G1_daughter;
+const double size_at_div = 1.665;
+const double DIV_SHIFT_RADIANS = .174533;
+const bool HAPLOID = false;
+
 
 //These two growth parameters set the timescale
 const double k_g1 = .01;
@@ -30,7 +49,7 @@ const double k_g2 = .01;
 //radii in the interval (.99*raius_average,1.01*radius_average)
 //This is assigned in the cell constructor at the time
 //of initiation based on the radius_average given below
-const double radius_average = .6;
+const double radius_average = 4.375;
 
 //A cell must reach nearly full size to start producing 
 //a bud this is when it enters S
@@ -38,7 +57,7 @@ const double k_G1 = .9;
 
 //When the bud reaches a threshold size
 //the mother and daughter cell will divide (cleave)
-const double k_mitosis = .7;
+const double k_mitosis = .5;
 
 //the strength of the spring force handling
 //the positional dynamics
@@ -57,10 +76,10 @@ const double k_neighbor = 1.1;
 
 //since cells are not infinitely hard spheres, some amount
 //of overlap is allowed
-const double k_repulsion_cell_cell = .8;
+const double k_repulsion_cell_cell = 1;
 
 //so that bud does not move away from mother
-const double k_adhesion_mother_bud = 1;
+const double k_adhesion_mother_bud = 50;
 
 //adhesion between unrelated cells
 const double k_adhesion_cell_cell = .1;
@@ -68,8 +87,10 @@ const double k_adhesion_cell_cell = .1;
 
 //adhesion between mother daughter cells
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
-const double POISSON = .4;
-const double ELASTIC_MOD = 45;
+const double POISSON = .3;
+const double ELASTIC_MOD = 1000;
+const double K_ADH = 15;
+const double K_BEND = 8;
 const double ADHESION_STRENGTH = 12;
 const double k_axial_frac = .5;
 //chou model params
@@ -91,4 +112,11 @@ const int array_size = 4;
 
 const double THETA = .75;
 const bool ADHESION_ON = false;
+const double SIGMA = .5;
+const double OMEGA = 500;
+const double SINGLE_BOND_BIND_ENERGY = 25.0;
+const double RECEPTOR_SURF_DENSITY = 1E15;
+const double TEMPERATURE = 300;
+const double KB = 1.38E-23;
+
 #endif

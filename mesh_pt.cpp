@@ -29,35 +29,44 @@ Mesh_Pt::Mesh_Pt(shared_ptr<Mesh>  my_mesh, double x, double y, int index){
 	this->index = index;
 	return;
 }
-void Mesh_Pt::find_neighbors(){
-	vector<shared_ptr<Mesh_Pt>> my_mesh_pts;
-	this->my_mesh->get_mesh_pts_vec(my_mesh_pts);
-	for(unsigned int i = 0; i < my_mesh_pts.size(); i++){
-		if((this->center - my_mesh_pts.at(i)->get_center()).length() < 4){
-			this->neighbors.push_back(my_mesh_pts.at(i)->get_index());
+void Mesh_Pt::find_neighbor_bins(){
+	vector <pair<double,shared_ptr<Mesh_Pt>>> distances;
+	vector <shared_ptr<Mesh_Pt>> mesh_pts;
+	my_mesh->get_mesh_pts_vec(mesh_pts);
+	shared_ptr<Mesh_Pt> this_mesh_pt = shared_from_this();
+
+	for(unsigned int i = 0; i < mesh_pts.size();i++){
+		if(mesh_pts.at(i)!= this_mesh_pt){
+			distances.push_back(make_pair((mesh_pts.at(i)->get_center()-center).length(),mesh_pts.at(i)));
 		}
+	}
+	sort(distances.begin(),distances.end());
+	for(unsigned int i = 0; i<8; i++){
+		this->neighbors.push_back(distances.at(i).second);
+		//cout << distances.at(i).second->get_index() << endl;
+	}
+	return;
+}
+
+void Mesh_Pt::clear_cells_vec(){
+	this->cells.clear();
+	return;
+}
+void Mesh_Pt::get_cells(vector<shared_ptr<Cell>>&  neighbors){
+	neighbors = this->cells;
+	return;
+}
+void Mesh_Pt::get_neighbor_bins(vector<shared_ptr<Mesh_Pt>>& neighbor_bins){
+	neighbor_bins = this->neighbors;
+	return;
+}
+void Mesh_Pt::add_cells_to_neighbor_vec(vector<shared_ptr<Cell>>& neighbor_cells){
+	for(unsigned int i =0; i < cells.size();i++){
+		neighbor_cells.push_back(cells.at(i));
 	}
 	return;
 }
 void Mesh_Pt::add_cell(shared_ptr<Cell>& new_cell){
 	this->cells.push_back(new_cell);
-	return;
-}
-void Mesh_Pt::clear_cells_vec(){
-	this->cells.clear();
-	return;
-}
-void Mesh_Pt::get_cells(vector<shared_ptr<Cell>>& neighbors){
-	neighbors = this->cells;
-	return;
-}
-void Mesh_Pt::get_neighboring_bins(vector<int>& neighbors){
-	neighbors = this->neighbors;
-	return;
-}
-void Mesh_Pt::push_back_cells(vector<shared_ptr<Cell>>& neighbor_cells){
-	for(unsigned int i = 0; i<cells.size();i++){
-		neighbor_cells.push_back(cells.at(i));
-	}
 	return;
 }

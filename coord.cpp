@@ -5,6 +5,7 @@
 //*************************************************
 
 // include dependencies
+#include <omp.h>
 #include <iostream>
 #include <unistd.h>
 #include "coord.h"
@@ -110,7 +111,12 @@ bool Coord::operator!=(const Coord& c) {
 double Coord::length() const {
 	return sqrt( (x*x) + (y*y));
 }
-
+double Coord::dot(const Coord& c) const{
+	return ( (x*c.get_X()) + (y*c.get_Y()));
+}
+double Coord::cross(const Coord& c) const{
+	return (x*c.get_Y())-(y*c.get_X());
+}
 // Display Functions
 ostream& operator<<(ostream& os, const Coord& c) {
 	os << '(' << c.get_X() << ',' << c.get_Y() << ')';

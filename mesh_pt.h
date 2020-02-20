@@ -30,18 +30,18 @@ class Mesh_Pt: public enable_shared_from_this<Mesh_Pt>{
 		shared_ptr<Mesh> my_mesh;
 		Coord center;
 		int index;
-		vector<int> neighbors;
+		vector<shared_ptr<Mesh_Pt>> neighbors;
 	public:
 		//constructor
 		Mesh_Pt(shared_ptr<Mesh> my_mesh, double x, double y, int index);
-		void find_neighbors();
-		Coord get_center(){return center;}
+		void find_neighbor_bins();
 		int get_index(){return index;}
+		Coord get_center(){return center;};
+		void get_cells(vector<shared_ptr<Cell>>& neighbors);
+		void get_neighbor_bins(vector<shared_ptr<Mesh_Pt>>& neighbor_bins);
+		void add_cells_to_neighbor_vec(vector<shared_ptr<Cell>>&  neighbor_cells);
 		void add_cell(shared_ptr<Cell>& new_cell);
 		void clear_cells_vec();
-		void get_cells(vector<shared_ptr<Cell>>& neighbors);
-		void get_neighboring_bins(vector<int>& neighbors);
-		void push_back_cells(vector<shared_ptr<Cell>>& neighbor_cells);
 };
 
 

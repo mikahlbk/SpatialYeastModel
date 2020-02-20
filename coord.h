@@ -44,6 +44,8 @@ class Coord {
 		bool operator==(const Coord& c);
 		bool operator!=(const Coord& c);
 		//Higher level math
+		double dot(const Coord& c) const;
+		double cross(const Coord& c) const;
 		double length() const;
 		//Display Functions
 		friend ostream& operator<<(ostream& os, const Coord& c);
