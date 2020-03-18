@@ -36,9 +36,64 @@ void Colony::make_founder_cell(){
      //pointer to tell founder cell what colony
      //it belongs to
      shared_ptr<Colony> this_colony = shared_from_this();
+     //num_cells = 0;
+     /*ifstream ifs(filename.c_str());
+     if(!ifs){
+     	cout << "NO file" << endl;
+	return;
+     }
+     stringstream ss;
+     string line;
+     string temp;
+     char trash;
+     int rank;
+     double radius;
+     Coord center;
+     double x, y;
+     int counter = 0;
+     int phase;
+     double progress;
+     while(getline(ifs,line)){
+     	ss.str(line);
+	getline(ss,temp,':');
+	//cout << ss << " here" << endl;
+	if(temp == "Rank"){
+		ss >> rank;
+		cout << "Rank " << rank << endl;
+	}
+	else if(temp == "Radius"){
+		ss >> radius;
+	}
+	else if(temp == "Xval"){
+		ss >> x;
+	}
+	else if(temp == "Yval"){
+		ss >> y;
+	}
+	else if(temp == "Phase"){
+		ss >> phase;
+	}
+	else if(temp == "CP"){
+		ss >> CP;
+	}
+	else if(temp == "End_Cell"){
+		center = Coord(x,y);
+		//counter++;
+		//cout << x << y << rank << radius << endl;
+		//cout << counter << endl;
+		uniform_real_distribution<> div_dist(0.0,1.0);
+     		double div_site = 2*pi*div_dist(this->dist_generator);
+     
+		auto new_cell = make_shared<Cell>(this_colony, rank, center, average_radius, radius, div_site, phase, CP);
+		update_Colony_Cell_Vec(new_cell);
+		new_cell->set_mother(new_cell);
+	}
+	ss.clear();
+	}
+	cout << "in function" << endl;
      //make founder cell
      //variables needed to 
-     //feed to cell constructor
+     //feed to cell constructor*/
      double new_max_radius;
      double init_radius;
      uniform_real_distribution<> div_dist(0.0,1.0);
@@ -51,6 +106,8 @@ void Colony::make_founder_cell(){
      auto new_cell = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius, div_site);
      update_Colony_Cell_Vec(new_cell);
      new_cell->set_mother(new_cell);
+     new_cell->update_lineage_vec(new_cell);
+    
     /*new_cell->perform_budding(0);
     center = Coord(4,0);
     auto new_cell2 = make_shared<Cell>(this_colony, 1, center, new_max_radius, init_radius, div_site);

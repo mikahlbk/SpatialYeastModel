@@ -3,12 +3,11 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
 #SBATCH --mem-per-cpu=2G
-#SBATCH --time=5:00:00
-#SBATCH --output=NO_ADH_Final_5.stdout
-#SBATCH --job-name="NO_ADH_Final_5"
-#SBATCH -p batch 
+#SBATCH --time=01:15:00
+#SBATCH --output=ADH_Final_608.stdout
+#SBATCH --job-name="ADH_Final_608"
+#SBATCH -p short
 
 set OMP_NUM_THREADS=12
-mkdir NO_ADH_Final_5
-./program NO_ADH_Final_5
-              
+mkdir ADH_Final_608
+./program ADH_Final_608

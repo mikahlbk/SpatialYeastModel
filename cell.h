@@ -21,6 +21,7 @@ class Colony;
 #include <memory>
 #include "parameters.h"
 #include "coord.h"
+#include "externs.h"
 //***********************************************************
 // Cell Class Declaration
 
@@ -32,6 +33,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		double curr_radius;
 		double max_radius;
 		int age;
+		int T_age;
 		double CP;
 		bool G1;
 		double G_one_length;
@@ -73,6 +75,9 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool get_M() {return M;}
 		double get_growth_rate() {return growth_rate;}
 		bool get_mother_status() {return is_mother;}
+		int get_phase();
+		int get_T_age(){return T_age;}
+		double get_CP(){return CP;}
 		void set_is_mother();
 		void set_at_max_size();
 		void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);
@@ -113,7 +118,9 @@ class Cell: public enable_shared_from_this<Cell>{
         	void compute_protein_concentration();
         	
 		//lineage output
+		void update_lineage_vec(shared_ptr<Cell> me); 
 		void get_lineage_vec(vector<shared_ptr<Cell>>& lineage_cells);
+		void return_lineage_vec(vector<int>& new_vec);
 		void get_lineage_g_vec(vector<int>& lineage_g_cells);
 		int get_sector(){return sector;}
       		

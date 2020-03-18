@@ -16,14 +16,14 @@
 //Simulation Constants
 
 //time in minutes
-const int end_time = 1400;
+const int end_time = 1440;
 const int NUM_STEPS = 1000000;//100000;
 
 //timestep
 const double dt = (double)end_time/(double)NUM_STEPS;
 
 //frequency of output for visualization
-const int OUTPUT_FREQ = 10000;
+const int OUTPUT_FREQ = 6250;
 
 //important constants 
 const double pi = 3.14;
@@ -89,7 +89,7 @@ const double k_adhesion_cell_cell = .1;
 const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
 const double POISSON = .3;
 const double ELASTIC_MOD = 1000;
-const double K_ADH = 15;
+const double K_ADH = 25;
 const double K_BEND = 8;
 const double ADHESION_STRENGTH = 12;
 const double k_axial_frac = .5;
@@ -109,9 +109,9 @@ const double Gamma = .00008;
 const double mu = .0077;
 const int n_0 = 1;
 const int array_size = 4;
-
+const double eta =  5.0;
 const double THETA = .75;
-const bool ADHESION_ON = false;
+//const bool ADHESION_ON = true;
 const double SIGMA = .5;
 const double OMEGA = 500;
 const double SINGLE_BOND_BIND_ENERGY = 25.0;

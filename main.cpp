@@ -24,18 +24,24 @@ using namespace std;
 
 //*****************************************
 
+int ADH_ON = 1;
 int main(int argc, char* argv[]) {
     
     //reads in name of folder to store output for visualization
     string anim_folder = argv[1];
-
+    for(int i = 1; i < argc; i++){
+    	if(!strcmp(argv[i], "-ADH")){
+		ADH_ON = stod(argv[i+1]);
+	}
+    }
     //keeps track of simulation time
     int start = clock();
     //cout << "clock" << endl;
-    
+    //string init_colony = "Init_cells.txt";
     //initialize seed for generating random numbers
     //is fed to colony constructor so that colony holds
     //the same seed and can give to other classes
+    
     std::random_device seed;
     std::mt19937 gen(seed());
     //std::mt19937 gen(6);
@@ -90,6 +96,7 @@ int main(int argc, char* argv[]) {
   	 //write data to txt file
 	//change OUTPUT_FREQ to smaller number in parameters.h
 	//if want to see more timesteps 
+	//cout << "In time loop" << endl;
 	if(Ti%OUTPUT_FREQ == 0){
         	//open txt file for writing cell data
             	Number = to_string(out);
@@ -130,7 +137,7 @@ int main(int argc, char* argv[]) {
 	//spatial rearrangment
 	//cout << "rearrange" << endl;
 	growing_Colony->update_locations();
-	//cout << "rearranged" << endl;
+	cout << "rearranged" << endl;
        
         //compute protein concentration
         //cout << "Protein Conc" << endl;

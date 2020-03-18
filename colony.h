@@ -26,6 +26,7 @@
 #include "coord.h"
 #include "cell.h"
 #include "mesh.h"
+#include "externs.h"
 //******************************************
 //COLONY Class Declaration
 

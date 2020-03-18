@@ -29,13 +29,23 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->max_radius = max_radius;
     this->curr_radius = init_radius;
     this->age = 0;
-    this-> CP = 0;
+    this->T_age = 0;
+    this-> CP = CP;
     this->G1 = true;
     this->G_one_length = G_one + G1*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
     //cout << "G1" << G_one << " " << G_one_length << endl;
     this->G2 = false;
     this->S = false;
     this->M = false;
+    /*if(phase == 1){
+    	this->G1 = true;
+    }else if(phase == 2){
+    	this->G2 = true;
+    }else if(phase == 3){
+    	this->S = true;
+    }else if(phase == 4){
+    	this->M = true;
+    }*/
     this->is_mother = true;
     this->mother = nullptr;
     this->curr_bud = nullptr;
@@ -48,7 +58,8 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->sector = 0;
     this->at_max_size = true;
     this->slow_grow = false;
-    //this->lineage is vector
+    //this->lineage.push_back(0);
+    //is vector
     griesemer_lineage.push_back(0);
     this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
     return;
@@ -60,6 +71,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->max_radius = max_radius;
     this->curr_radius = init_radius;
     this->age = 0;
+    this->T_age = 0;
     this-> CP = 0;
     this->G1 = true;
     this->G_one_length = G_one + G1*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
@@ -101,6 +113,21 @@ void Cell::add_daughter(shared_ptr<Cell> daughter){
     this->daughters.push_back(daughter);
     return;
 }
+void Cell::update_lineage_vec(shared_ptr<Cell> me){
+	lineage.push_back(me);
+	return;
+}
+int Cell::get_phase(){
+	if(this->G1){
+		return 1;
+	}else if(this->G2){
+		return 2;
+	}else if(this->S){
+		return 3;
+	}else if(this->M){
+		return 4;
+	}
+}
 void Cell::find_bin(){
      shared_ptr<Cell> this_cell = shared_from_this();	
      vector<shared_ptr<Mesh_Pt>> mesh_pts;
@@ -126,6 +153,12 @@ void Cell::find_bin(){
 }
 void Cell::slow_grow_on(){
 	this->slow_grow = true;
+}
+void  Cell::return_lineage_vec(vector<int> & ranks){
+	for(unsigned int i = 0; i< lineage.size(); i++){
+		ranks.push_back(lineage.at(i)->get_rank());
+	}
+	return;
 }
 void Cell::change_gr(){
 	this->G_one_length = 120;
@@ -376,7 +409,9 @@ void Cell::perform_budding(int Ti){
     this->curr_protein = curr_protein*.7;
     vector<shared_ptr<Cell>> new_lineage;
     this->get_lineage_vec(new_lineage);
-    new_lineage.push_back(this_cell);
+    if(this->rank != 0){
+    	new_lineage.push_back(this_cell);
+    }
     int sector;
     vector<int> new_lineage_g;
     this->get_lineage_g_vec(new_lineage_g);
@@ -482,6 +517,7 @@ double Cell::compute_distance(shared_ptr<Cell> neighbor_cell){
 	return distance;
 }
 void Cell::get_cell_force(){
+    this->T_age++;
     Coord force;
     vector<shared_ptr<Cell>> neighbor_cells;
     this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id, neighbor_cells);
@@ -535,7 +571,8 @@ Coord Cell::calc_forces_Hertz(shared_ptr<Cell> my_neighbor){
 		d_ij = (my_loc-neighbor_loc).length();
 		v_ij = (my_loc - neighbor_loc);
 		sqrt_term = sqrt((my_radius*neighbor_radius)/(my_radius+neighbor_radius));
-		if(ADHESION_ON){
+		if(ADH_ON == 1){
+			//cout << "ADH_VARIABLE == " << ADH_ON << endl;
 			//ADHESION_ON IS A BOOLEAN IN PARAMETERS FILE
 			//turns in adhesion between mother and bud
 			if((my_neighbor == curr_bud)){
@@ -570,15 +607,21 @@ Coord Cell::calc_forces_Hertz(shared_ptr<Cell> my_neighbor){
 		}	
 		if(my_radius + neighbor_radius - d_ij >= 0){
 			rep_force += v_ij*.5*(1/d_ij)*pow(my_radius+neighbor_radius -d_ij,1.5)*E_ij_inverse*sqrt_term;
-			//adh_force_reg += v_ij*SINGLE_BOND_BIND_ENERGY*RECEPTOR_SURF_DENSITY*KB*TEMPERATURE*M_PI*(my_radius + neighbor_radius)*.5*-1;
 			//cout << "rep_force" << rep_force << endl;
 		}
+		if((my_radius + neighbor_radius - d_ij < 1) && (my_radius + neighbor_radius - d_ij > -1)){
+			adh_force_reg += v_ij*SINGLE_BOND_BIND_ENERGY*RECEPTOR_SURF_DENSITY*KB*TEMPERATURE*M_PI*(my_radius + neighbor_radius)*.5*-1;
+		}		
 		
 		
 	
      }
      //cout << "Rep_force" << rep_force << endl;
-     curr_force = rep_force + adh_force; //adh_force_reg + adh_force;// + bending_force;
+     //Coord unit_vec = (rep_force + adh_force + adh_force_reg);
+     //double length_vec =  (rep_force + adh_force + adh_force_reg).length();
+     //cout  <<"unit vec" << unit_vec<< "length" << length_vec <<  endl;
+     curr_force = rep_force + adh_force + adh_force_reg;
+     //cout <<"curr force"  << curr_force << endl;// + adh_force;// + bending_force;
      return curr_force;
 }
 
@@ -740,7 +783,7 @@ void Cell::lennard_jones_potential(){
 }
 void Cell::update_location(){
     //cout << this->curr_bud << endl;
-    cell_center = cell_center + curr_force*dt;
+    cell_center = cell_center + curr_force*1.0/(1+(curr_radius/2))*dt;
 	return;
 }
 /*void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
@@ -773,11 +816,19 @@ void Cell::compute_protein_concentration(){
     return;
 } 
 void Cell::print_txt_file_format(ofstream& ofs){
-    ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << " " << curr_protein << " ";
+    ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << " ";
     for(unsigned int i = 0; i < this->griesemer_lineage.size();i++){
     	ofs << "/" << griesemer_lineage.at(i);
     }
-    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_bud_status() << endl;
+    ofs << " ";
+    //cout << "getting vec" << endl;
+    vector<int> lineages;
+    return_lineage_vec(lineages);
+    //cout << "lineages loop" << endl;
+    for(unsigned int i = 0; i < lineages.size();i++){
+    	ofs << "/" << lineages.at(i);
+    }
+    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() <<  endl;
 
     return;
 }
