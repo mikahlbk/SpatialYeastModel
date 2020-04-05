@@ -26,7 +26,7 @@ using namespace std;
 
 int ADH_ON = 1;
 int main(int argc, char* argv[]) {
-    
+    //cout << "Starting" << endl;
     //reads in name of folder to store output for visualization
     string anim_folder = argv[1];
     for(int i = 1; i < argc; i++){
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     //keeps track of simulation time
     int start = clock();
     //cout << "clock" << endl;
-    //string init_colony = "Init_cells.txt";
+    string init_colony = "mixed_initial.txt";
     //initialize seed for generating random numbers
     //is fed to colony constructor so that colony holds
     //the same seed and can give to other classes
@@ -69,9 +69,11 @@ int main(int argc, char* argv[]) {
     //cout << "Made Colony" << endl;
     
     //make founder cell
+    //growing_Colony->make_founder_cell(init_colony);
     growing_Colony->make_founder_cell();
     //cout << "Made Founder Cell" << endl;
-	
+    //growing_Colony->match_up();
+    //cout << "Match up" << endl;
     //variables for writing output files
     string format = ".txt";
     string initial = "/locations";
@@ -137,7 +139,7 @@ int main(int argc, char* argv[]) {
 	//spatial rearrangment
 	//cout << "rearrange" << endl;
 	growing_Colony->update_locations();
-	cout << "rearranged" << endl;
+	//cout << "rearranged" << endl;
        
         //compute protein concentration
         //cout << "Protein Conc" << endl;

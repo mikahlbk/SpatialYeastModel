@@ -41,7 +41,8 @@ class Colony: public enable_shared_from_this<Colony>{
 		Colony(shared_ptr<Mesh> my_mesh, mt19937 gen);
         	//Colony(shared_ptr<Mesh> my_mesh);
 		//make founder cell
-        	void make_founder_cell();
+        	//void make_founder_cell(string filename);
+		void make_founder_cell();
 		double uniform_random_real_number(double a, double b);
 		//getters and setters
 		void get_Cells(vector<shared_ptr<Cell>>& new_cells);
@@ -55,7 +56,9 @@ class Colony: public enable_shared_from_this<Colony>{
 		void update_cell_cycles(int Ti);
         	void perform_budding(int Ti);
 		void perform_mitosis(int Ti);
+		void match_up();
 		void update_locations();
+		shared_ptr<Cell> return_cell(int cell_rank);
 		void update_protein_concentration();
         	void print_vtk_file(ofstream& ofs);
         	void write_data(ofstream& ofs);

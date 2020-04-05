@@ -22,6 +22,101 @@ using namespace std;
 //Public Member Functions for Cell.cpp
 
 //constructor
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int phase,double CP, int bud_status, int Mother, int my_col){
+    //cout << "im in" << endl;
+    this->my_colony = my_colony;
+    this->rank = rank;
+    this->cell_center = cell_center;
+    this->max_radius = max_radius;
+    this->curr_radius = init_radius;
+    this->age = 0;
+    this->T_age = 0;
+    this-> CP = CP;
+    if(phase == 1){
+    	this->G1 = true;
+	this->G2 = false;
+	this->S = false;
+	this->M = false;
+    }
+    else if(phase == 2){
+    	this->G1 = false;
+	this->G2 = true;
+	this->S = false;
+	this->M = false;
+    }
+    else if(phase == 3){
+
+    	this->G1 = false;
+	this->G2 = false;
+	this->S = true;
+	this->M = false;
+    }
+    else{
+
+    	this->G1 = false;
+	this->G2 = false;
+	this->S = false;
+	this->M = true;
+    }
+    this->G_one_length = G_one + G1*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    //cout << "G1" << G_one << " " << G_one_length << endl;
+    //this->G2 = false;
+    //this->S = false;
+    //this->M = false;
+    /*if(phase == 1){
+    	this->G1 = true;
+    }else if(phase == 2){
+    	this->G2 = true;
+    }else if(phase == 3){
+    	this->S = true;
+    }else if(phase == 4){
+    	this->M = true;
+    }*/
+    this->is_mother = false;
+    cout << "this one" << endl;
+    this->mother_rank = Mother;
+    this->mother = nullptr;
+    cout << "big money" << endl;
+    this->curr_bud = nullptr;
+    if(bud_status == 1){
+	this->is_bud = true;
+    }else{
+	this->is_bud = false;
+    }
+    this->has_bud = false;
+    this->equi_point = cell_center;
+    this->curr_protein = P_0;
+    this->curr_div_site = div_site;
+    this->div_site_vec.push_back(curr_div_site);
+    this->sector = 0;
+    this->at_max_size = false;
+    this->slow_grow = false;
+    //this->lineage.push_back(0);
+    //is vector
+    this->color = my_col;
+    griesemer_lineage.push_back(0);
+    this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
+    cout << "out" << endl;
+    return;
+}
+void Cell::mother_bud_check(){
+     shared_ptr<Cell> this_cell = shared_from_this();
+     if(this->is_bud){
+     	change_mother_vars(this->mother,this_cell);
+     }	
+     return;
+}
+void Cell::mother_rank_to_ptr(){
+	this->mother = this->my_colony->return_cell(mother_rank);
+	return;
+}
+void Cell::change_mother_vars(shared_ptr<Cell> mother_cell, shared_ptr<Cell> bud){
+     mother_cell->set_is_mother();
+     mother_cell->set_has_bud();
+     mother_cell->set_bud(bud);
+     return;
+}
+
 Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site){
     this->my_colony = my_colony;
     this->rank = rank;
@@ -37,15 +132,6 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->G2 = false;
     this->S = false;
     this->M = false;
-    /*if(phase == 1){
-    	this->G1 = true;
-    }else if(phase == 2){
-    	this->G2 = true;
-    }else if(phase == 3){
-    	this->S = true;
-    }else if(phase == 4){
-    	this->M = true;
-    }*/
     this->is_mother = true;
     this->mother = nullptr;
     this->curr_bud = nullptr;
@@ -64,7 +150,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
     return;
 }
-Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int>g_lineage,int sector, int bin_id){
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int>g_lineage,int sector, int bin_id,int my_col){
     this->my_colony = my_colony;
     this->rank = rank;
     this->cell_center = cell_center;
@@ -93,6 +179,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->griesemer_lineage = g_lineage;
     this->bin_id = bin_id;
     this->slow_grow = false;
+    this->color = my_col;
     this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
     return;
 }
@@ -206,6 +293,9 @@ void Cell::reset_is_bud(){
 }
 void Cell::reset_has_bud(){
         this->has_bud = false;
+}
+void Cell::set_has_bud(){
+	this->has_bud = true;
 }
 void Cell::set_is_mother(){
 	this->is_mother = true;	
@@ -423,7 +513,7 @@ void Cell::perform_budding(int Ti){
     	sector = this->sector;
     }
 	//cout << "New cell rank: " << new_rank << endl;
-    auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center,new_max_radius, init_radius,this_cell,protein, new_division_site+pi, new_lineage, new_lineage_g, sector, this->bin_id);
+    auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center,new_max_radius, init_radius,this_cell,protein, new_division_site+pi, new_lineage, new_lineage_g, sector, this->bin_id,this->color);
     my_colony->get_mesh()->assign_cell_to_bin(this->bin_id,new_cell);
     this->add_daughter(new_cell);
     this->curr_bud = new_cell;
@@ -817,19 +907,19 @@ void Cell::compute_protein_concentration(){
 } 
 void Cell::print_txt_file_format(ofstream& ofs){
     ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << " ";
-    for(unsigned int i = 0; i < this->griesemer_lineage.size();i++){
-    	ofs << "/" << griesemer_lineage.at(i);
-    }
-    ofs << " ";
+    //for(unsigned int i = 0; i < this->griesemer_lineage.size();i++){
+    //	ofs << "/" << griesemer_lineage.at(i);
+    //}
+    //ofs << " ";
     //cout << "getting vec" << endl;
-    vector<int> lineages;
-    return_lineage_vec(lineages);
+    //vector<int> lineages;
+    //return_lineage_vec(lineages);
     //cout << "lineages loop" << endl;
-    for(unsigned int i = 0; i < lineages.size();i++){
-    	ofs << "/" << lineages.at(i);
-    }
-    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() <<  endl;
-
+    //for(unsigned int i = 0; i < lineages.size();i++){
+    //	ofs << "/" << lineages.at(i);
+    //}
+    //ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() <<  this->get_color() << endl;
+    ofs << " " << this->get_color() << endl;
     return;
 }
 void Cell::print_cell_center(ofstream& ofs){

@@ -32,11 +32,11 @@ Colony::Colony(shared_ptr<Mesh> new_mesh, mt19937  gen) {
 	//this->div_distribution = uniform_real_distribution<> distribution(0.0,1.0);
 	return;
 }*/
-void Colony::make_founder_cell(){
+void Colony::make_founder_cell();//string filename){
      //pointer to tell founder cell what colony
      //it belongs to
      shared_ptr<Colony> this_colony = shared_from_this();
-     //num_cells = 0;
+     int num_cells = 0;
      /*ifstream ifs(filename.c_str());
      if(!ifs){
      	cout << "NO file" << endl;
@@ -50,9 +50,13 @@ void Colony::make_founder_cell(){
      double radius;
      Coord center;
      double x, y;
+     double CP;
      int counter = 0;
      int phase;
      double progress;
+     int Mother;
+     int bud_status;
+     int my_col;
      while(getline(ifs,line)){
      	ss.str(line);
 	getline(ss,temp,':');
@@ -63,29 +67,57 @@ void Colony::make_founder_cell(){
 	}
 	else if(temp == "Radius"){
 		ss >> radius;
+		cout << "Radius" << radius << endl;
 	}
 	else if(temp == "Xval"){
 		ss >> x;
+		cout << "Xval" << x << endl;
 	}
 	else if(temp == "Yval"){
 		ss >> y;
+		cout << "Yval" << y << endl;
 	}
 	else if(temp == "Phase"){
 		ss >> phase;
+		cout << "Phase" << phase << endl;
 	}
 	else if(temp == "CP"){
 		ss >> CP;
+		cout << "CP" << CP << endl;
 	}
-	else if(temp == "End_Cell"){
+	else if(temp == "Bud_Status"){
+                ss >> bud_status;
+		cout << "Bud Stat" << bud_status << endl;
+        }
+	else if(temp=="Mother"){
+		ss >> Mother;
+		cout << " Mother" << Mother << endl;
+	}
+	else if(temp == "End Cell"){
+		cout << x << endl;
+		cout << y << endl;
+		cout << rank << endl;
+		cout << radius << endl;
 		center = Coord(x,y);
-		//counter++;
-		//cout << x << y << rank << radius << endl;
-		//cout << counter << endl;
+		cout << "Center" << endl;
 		uniform_real_distribution<> div_dist(0.0,1.0);
-     		double div_site = 2*pi*div_dist(this->dist_generator);
-     
-		auto new_cell = make_shared<Cell>(this_colony, rank, center, average_radius, radius, div_site, phase, CP);
+     		cout << "here" << endl;
+
+		double div_site = 2*pi*div_dist(this->dist_generator);
+     		cout << "Here??" << endl;
+
+		double color = div_dist(this->dist_generator);
+		if(rank == 6){
+			my_col = 1;
+		}
+		else{
+			my_col = 2;
+		}
+		cout << "check" << endl;
+		auto new_cell = make_shared<Cell>(this_colony, rank, center, average_radius, radius, div_site, phase, CP, bud_status, Mother,my_col);
+		cout << "check two" << endl;
 		update_Colony_Cell_Vec(new_cell);
+		cout << "check three" << endl;
 		new_cell->set_mother(new_cell);
 	}
 	ss.clear();
@@ -103,10 +135,11 @@ void Colony::make_founder_cell(){
      new_max_radius = average_radius;// + static_cast<double>(rand() % 10 + 99)/(double)(100.0);
      init_radius = new_max_radius;
      center = Coord(0,0);
-     auto new_cell = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius, div_site);
+     auto new_cell =
+	     make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius, div_site);
      update_Colony_Cell_Vec(new_cell);
      new_cell->set_mother(new_cell);
-     new_cell->update_lineage_vec(new_cell);
+     new_cell->update_lineage_vec(new_cell);*/
     
     /*new_cell->perform_budding(0);
     center = Coord(4,0);
@@ -135,6 +168,15 @@ double Colony::uniform_random_real_number(double a, double b){
 	uniform_real_distribution<> dis(a,b);
 	return dis(this->dist_generator);
 }
+void Colony::match_up(){
+	for(unsigned int i = 0; i < cells.size(); i++){
+		cells.at(i)->mother_rank_to_ptr();
+		cells.at(i)->mother_bud_check();
+	}
+	return;
+}
+
+
 void Colony::get_Cells(vector<shared_ptr<Cell>>& new_cells){
 	new_cells = cells;
 	return;
@@ -214,6 +256,9 @@ void Colony::update_protein_concentration(){
 	//cout << "Protein after" << cells.at(i)->get_protein_conc() << endl;
     }
 	return;
+}
+shared_ptr<Cell> Colony::return_cell(int cell_rank){
+	return this->cells.at(cell_rank);
 }
 void Colony::update_locations(){
 	//cout << "in colony" << endl;

@@ -40,6 +40,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool S;
 		bool G2;
 		bool M;
+		int mother_rank;
 		double growth_rate;
 		bool is_mother;
 		vector<shared_ptr<Cell>> daughters;
@@ -56,12 +57,15 @@ class Cell: public enable_shared_from_this<Cell>{
 		vector<int> griesemer_lineage;
 		int sector;
 		int bin_id;
+		int color;
 		bool slow_grow;
+		//int mother;
 		Coord equi_point;
 	public:
 		//Constructors
+		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int phase, double CP, int bud_status, int Mother, int my_col);
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site);
-        	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int> g_lineage, int sector, int bin_id);		
+        	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int> g_lineage, int sector, int bin_id, int my_col);		
 		shared_ptr<Colony> get_Colony(){return my_colony;}
 		int get_rank() {return rank;}
 		Coord get_Cell_Center(){return cell_center;}
@@ -73,7 +77,9 @@ class Cell: public enable_shared_from_this<Cell>{
 		bool get_G2() {return G2;}
 		bool get_S() {return S;}
 		bool get_M() {return M;}
+		int get_color() {return color;}
 		double get_growth_rate() {return growth_rate;}
+		void mother_rank_to_ptr();
 		bool get_mother_status() {return is_mother;}
 		int get_phase();
 		int get_T_age(){return T_age;}
@@ -89,6 +95,9 @@ class Cell: public enable_shared_from_this<Cell>{
         	void reset_is_bud();
         	void reset_has_bud();
         	int get_bud_status();	
+		void mother_bud_check();
+		void set_has_bud();
+		void change_mother_vars(shared_ptr<Cell> mother_cell,shared_ptr<Cell> bud_cell);
 		//cell cycle
 		double compute_distance(shared_ptr<Cell> neighbor_cell);
 		bool far_enough_from_neighbors(); 

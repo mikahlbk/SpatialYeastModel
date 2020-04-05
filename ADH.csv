@@ -1,3 +1,8 @@
--p,batch,-hours,5,-cores,12,-test,ADH_Off
+-p,batch,-hours,5,-cores,12,-test,Mixed_test_second_gen
 -ADH
+1
+1
+1
+0
+0
 0
