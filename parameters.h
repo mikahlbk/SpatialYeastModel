@@ -98,10 +98,10 @@ const double k_r = 1;
 const double k_a = .2;
 
 //signaling params
-const double P_0 = 50;
-const double r_LOGISTIC = .0008;
+//const double P_0 = 50;
+//const double r_LOGISTIC = 1;
 const double K_LOGISTIC = 100;
-const double A_LOGISTIC = 20;
+//const double A_LOGISTIC = 20;
 //signaling params DNPM
 const double alpha = .0154;
 const double beta = 12;
@@ -114,7 +114,7 @@ const double THETA = .75;
 //const bool ADHESION_ON = true;
 const double SIGMA = .5;
 const double OMEGA = 500;
-const double SINGLE_BOND_BIND_ENERGY = 25.0;
+//const double SINGLE_BOND_BIND_ENERGY = 25.0;
 const double RECEPTOR_SURF_DENSITY = 1E15;
 const double TEMPERATURE = 300;
 const double KB = 1.38E-23;

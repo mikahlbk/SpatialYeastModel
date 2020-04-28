@@ -43,6 +43,7 @@ class Colony: public enable_shared_from_this<Colony>{
 		//make founder cell
         	//void make_founder_cell(string filename);
 		void make_founder_cell();
+		void make_founder_cell(string filename);
 		double uniform_random_real_number(double a, double b);
 		//getters and setters
 		void get_Cells(vector<shared_ptr<Cell>>& new_cells);

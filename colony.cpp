@@ -32,100 +32,12 @@ Colony::Colony(shared_ptr<Mesh> new_mesh, mt19937  gen) {
 	//this->div_distribution = uniform_real_distribution<> distribution(0.0,1.0);
 	return;
 }*/
-void Colony::make_founder_cell();//string filename){
-     //pointer to tell founder cell what colony
-     //it belongs to
+void Colony::make_founder_cell(){
      shared_ptr<Colony> this_colony = shared_from_this();
      int num_cells = 0;
-     /*ifstream ifs(filename.c_str());
-     if(!ifs){
-     	cout << "NO file" << endl;
-	return;
-     }
-     stringstream ss;
-     string line;
-     string temp;
-     char trash;
-     int rank;
-     double radius;
-     Coord center;
-     double x, y;
-     double CP;
-     int counter = 0;
-     int phase;
-     double progress;
-     int Mother;
-     int bud_status;
-     int my_col;
-     while(getline(ifs,line)){
-     	ss.str(line);
-	getline(ss,temp,':');
-	//cout << ss << " here" << endl;
-	if(temp == "Rank"){
-		ss >> rank;
-		cout << "Rank " << rank << endl;
-	}
-	else if(temp == "Radius"){
-		ss >> radius;
-		cout << "Radius" << radius << endl;
-	}
-	else if(temp == "Xval"){
-		ss >> x;
-		cout << "Xval" << x << endl;
-	}
-	else if(temp == "Yval"){
-		ss >> y;
-		cout << "Yval" << y << endl;
-	}
-	else if(temp == "Phase"){
-		ss >> phase;
-		cout << "Phase" << phase << endl;
-	}
-	else if(temp == "CP"){
-		ss >> CP;
-		cout << "CP" << CP << endl;
-	}
-	else if(temp == "Bud_Status"){
-                ss >> bud_status;
-		cout << "Bud Stat" << bud_status << endl;
-        }
-	else if(temp=="Mother"){
-		ss >> Mother;
-		cout << " Mother" << Mother << endl;
-	}
-	else if(temp == "End Cell"){
-		cout << x << endl;
-		cout << y << endl;
-		cout << rank << endl;
-		cout << radius << endl;
-		center = Coord(x,y);
-		cout << "Center" << endl;
-		uniform_real_distribution<> div_dist(0.0,1.0);
-     		cout << "here" << endl;
-
-		double div_site = 2*pi*div_dist(this->dist_generator);
-     		cout << "Here??" << endl;
-
-		double color = div_dist(this->dist_generator);
-		if(rank == 6){
-			my_col = 1;
-		}
-		else{
-			my_col = 2;
-		}
-		cout << "check" << endl;
-		auto new_cell = make_shared<Cell>(this_colony, rank, center, average_radius, radius, div_site, phase, CP, bud_status, Mother,my_col);
-		cout << "check two" << endl;
-		update_Colony_Cell_Vec(new_cell);
-		cout << "check three" << endl;
-		new_cell->set_mother(new_cell);
-	}
-	ss.clear();
-	}
-	cout << "in function" << endl;
      //make founder cell
      //variables needed to 
-     //feed to cell constructor*/
+     //feed to cell constructor
      double new_max_radius;
      double init_radius;
      uniform_real_distribution<> div_dist(0.0,1.0);
@@ -139,39 +51,87 @@ void Colony::make_founder_cell();//string filename){
 	     make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius, div_site);
      update_Colony_Cell_Vec(new_cell);
      new_cell->set_mother(new_cell);
-     new_cell->update_lineage_vec(new_cell);*/
-    
-    /*new_cell->perform_budding(0);
-    center = Coord(4,0);
-    auto new_cell2 = make_shared<Cell>(this_colony, 1, center, new_max_radius, init_radius, div_site);
-    update_Colony_Cell_Vec(new_cell2);
-    rank = cells.size();
-    new_cell->set_mother(new_cell2);
-    center = Coord(3,4);
-    auto new_cell3 = make_shared<Cell>(this_colony, 2, center, new_max_radius, init_radius, div_site);
-    update_Colony_Cell_Vec(new_cell3);
-    rank = cells.size();
-    new_cell->set_mother(new_cell3);
-    center = Coord(0,2);
-    auto new_cell4 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
-    update_Colony_Cell_Vec(new_cell4);
-    rank = cells.size();
-    new_cell->set_mother(new_cell);
-    center = Coord(0,-2);
-    auto new_cell5 = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius);
-    update_Colony_Cell_Vec(new_cell5);
-    rank = cells.size();
-    new_cell->set_mother(new_cell);*/
+     new_cell->update_lineage_vec(new_cell);
     return;
 }
+void Colony:: make_founder_cell(string filename){
+	shared_ptr<Colony> this_colony = shared_from_this();
+	int num_cells = 0;
+	ifstream ifs(filename.c_str());
+	if (!ifs){
+		cout << "No File" << endl;
+		return;
+	}
+	stringstream ss;
+	string line;
+	string item;
+	int rank;
+	double x_coord;
+	double y_coord;
+	double radius;
+	int bud_status;
+	int phase;
+	double cell_prog;
+	int mother;
+	while(getline(ifs,line)){
+		ss.str(line);
+		getline(ss,item,' ');
+		rank = stoi(item);
+		getline(ss,item,' ');
+		x_coord = stod(item);
+		getline(ss,item,' ');
+		y_coord = stod(item);
+		getline(ss,item,' ');
+		radius = stod(item);
+		getline(ss,item,' ');
+		bud_status = stoi(item);
+		getline(ss,item,' ');
+		phase = stoi(item);
+		getline(ss,item,' ' );
+		cell_prog = stod(item);
+		getline(ss,item,' ');
+		mother = stoi(item);
+		double new_max_radius;
+     		double init_radius;
+     		uniform_real_distribution<> div_dist(0.0,1.0);
+     		double color_roll = div_dist(this->dist_generator);
+		int color;
+		//int START_CELL = rand() % 11;
+		if(rank == 1){//START_CELL){
+			color = 0;
+		}else{
+			color = 1;
+		}
+		//uniform_real_distribution<> div_dist(0.0,1.0);
+     		double div_site = 2*pi*div_dist(this->dist_generator);
+     		Coord center;
+     		new_max_radius = average_radius;// + static_cast<double>(rand() % 10 + 99)/(double)(100.0);
+     		init_radius = radius;
+     		center = Coord(x_coord,y_coord);
+     		cout << rank << bud_status << cell_prog << endl;
+		auto new_cell = make_shared<Cell>(this_colony, rank, center, new_max_radius, init_radius, div_site,bud_status,phase,cell_prog,mother,color);
+     		update_Colony_Cell_Vec(new_cell);
+		new_cell->set_mother(new_cell);
+     		new_cell->update_lineage_vec(new_cell);
+   
+		ss.clear();
+	}
+	return;
+}
+
 double Colony::uniform_random_real_number(double a, double b){
 	uniform_real_distribution<> dis(a,b);
 	return dis(this->dist_generator);
 }
 void Colony::match_up(){
 	for(unsigned int i = 0; i < cells.size(); i++){
+		//cout << "rank: " << i << "pointer: " << cells.at(i) << endl;
 		cells.at(i)->mother_rank_to_ptr();
 		cells.at(i)->mother_bud_check();
+
+	}
+	for(unsigned int i = 0; i < cells.size(); i++){
+		cells.at(i)->return_bud_status();
 	}
 	return;
 }

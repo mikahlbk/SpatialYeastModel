@@ -1,6 +1,6 @@
 CC= -g++ -fopenmp -static-libstdc++
 
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall -O3
 
 all: program
 

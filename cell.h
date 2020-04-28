@@ -63,19 +63,23 @@ class Cell: public enable_shared_from_this<Cell>{
 		Coord equi_point;
 	public:
 		//Constructors
-		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int phase, double CP, int bud_status, int Mother, int my_col);
+		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int bud_status, int phase, double CP, int Mother, int my_col);
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site);
         	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int> g_lineage, int sector, int bin_id, int my_col);		
 		shared_ptr<Colony> get_Colony(){return my_colony;}
 		int get_rank() {return rank;}
 		Coord get_Cell_Center(){return cell_center;}
+		void return_bud_status();
 		double get_radius() {return curr_radius;}
 		double get_max_radius() {return max_radius;}
 		int get_age() {return age;}
 		bool get_G1() {return G1;}
 		int get_G1_length() {return G_one_length;}
+		void set_protein_conc(double protein);
+		double get_protein(){return curr_protein;}
 		bool get_G2() {return G2;}
 		bool get_S() {return S;}
+		bool return_has_bud() {return has_bud;}
 		bool get_M() {return M;}
 		int get_color() {return color;}
 		double get_growth_rate() {return growth_rate;}
@@ -84,6 +88,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		int get_phase();
 		int get_T_age(){return T_age;}
 		double get_CP(){return CP;}
+		void get_bud_status_mom(shared_ptr<Cell> mother);
 		void set_is_mother();
 		void set_at_max_size();
 		void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);

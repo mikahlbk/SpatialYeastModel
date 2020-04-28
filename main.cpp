@@ -25,6 +25,10 @@ using namespace std;
 //*****************************************
 
 int ADH_ON = 1;
+double SINGLE_BOND_BIND_ENERGY = 25;
+double P_0 = 50;
+double r_LOGISTIC = 1;
+double A_LOGISTIC = 35;
 int main(int argc, char* argv[]) {
     //cout << "Starting" << endl;
     //reads in name of folder to store output for visualization
@@ -32,12 +36,24 @@ int main(int argc, char* argv[]) {
     for(int i = 1; i < argc; i++){
     	if(!strcmp(argv[i], "-ADH")){
 		ADH_ON = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-HERTZ_ADH")){
+		SINGLE_BOND_BIND_ENERGY = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-Initial_Protein")){
+		P_0 = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-growth_rate")){
+		r_LOGISTIC = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-competition_term")){
+		A_LOGISTIC = stod(argv[i+1]);
 	}
+
+
+
     }
     //keeps track of simulation time
     int start = clock();
     //cout << "clock" << endl;
-    string init_colony = "mixed_initial.txt";
+    string init_colony = "mixed_initial.csv";
+    //cout << "read in text file" << endl;
     //initialize seed for generating random numbers
     //is fed to colony constructor so that colony holds
     //the same seed and can give to other classes
@@ -176,7 +192,7 @@ int main(int argc, char* argv[]) {
      myfile.close();
   
      int stop = clock();
-     cout << "Time: " << (stop-start) / double(CLOCKS_PER_SEC)*1000 << endl;
+     //cout << "Time: " << (stop-start) / double(CLOCKS_PER_SEC)*1000 << endl;
      //Need to add way to store data over multiple runs
     
     return 0;
