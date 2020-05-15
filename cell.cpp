@@ -391,18 +391,37 @@ void Cell::perform_budding(int Ti){
     uniform_real_distribution<> dis(0.0,1.0);
 		
     if(HAPLOID){
-    	//division will happen next to last division site
-	//first one assigned is randomly placed
-	//curr div site is most recent
-	//div site vector stores them all
-	//division_site = this->curr_div_site;
-	//50% chance to go above or below
-	//how to implement this?
-    }
-    else{
-    	if(is_mother){//need a mother check here
+    	new_division_site = curr_div_site;
+	//cout << "new site: " << new_division_site << endl;
+	if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
+	//move 10 degrees up until new
+	do{
+		used = false;
+		//cout << "stuck in while" << endl;
+		new_division_site = new_division_site - DIV_SHIFT_RADIANS;
+		for(unsigned int i=0;i<this->div_site_vec.size();i++){
+			if(new_division_site == div_site_vec.at(i)){
+				used = true;
+			}
+		}	
+	}while(used);
+	}else{
+	//move 10 down until new
+	do{
+		used = false;
+		//cout << "stuck in while" << endl;
+		new_division_site = new_division_site + DIV_SHIFT_RADIANS;
+		for(unsigned int i=0;i<this->div_site_vec.size();i++){
+			if(new_division_site == div_site_vec.at(i)){
+				used = true;
+			}
+		}	
+	}while(used);	
+	}
+    }else{
+    	//if(is_mother){//need a mother check here
         	//mother has 50% chance opposite or adjacent
-		if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
+		//if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
 			//opposite
 			//cout << "Rank: " << rank << endl;
 			//cout << "current: " << curr_div_site << endl;
@@ -450,8 +469,8 @@ void Cell::perform_budding(int Ti){
 					}while(used);	
 				}
 			}	
-		}
-		else{
+		//}
+	/*	else{
 			//adjacent or same side
 			//cout << "Rank: " << rank << endl;
 			//cout << "current: " << curr_div_site << endl;
@@ -491,7 +510,7 @@ void Cell::perform_budding(int Ti){
 		//is daughter
 		new_division_site = curr_div_site + pi;
 		set_is_mother();
-	}
+	}*/
 	
     }
     

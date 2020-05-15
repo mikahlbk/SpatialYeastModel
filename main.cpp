@@ -25,6 +25,7 @@ using namespace std;
 //*****************************************
 
 int ADH_ON = 1;
+int HAPLOID = 0;
 double SINGLE_BOND_BIND_ENERGY = 25;
 double P_0 = 50;
 double r_LOGISTIC = 1;
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]) {
 		r_LOGISTIC = stod(argv[i+1]);
 	}else if(!strcmp(argv[i],"-competition_term")){
 		A_LOGISTIC = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-division")){
+		HAPLOID = stod(argv[i+1]);
 	}
 
 

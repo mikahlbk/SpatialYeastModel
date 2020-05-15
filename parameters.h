@@ -38,7 +38,7 @@ const double average_G1_daughter = 75.0;
 //not needed-const double average_growth_rate = average_radius/average_G1_daughter;
 const double size_at_div = 1.665;
 const double DIV_SHIFT_RADIANS = .174533;
-const bool HAPLOID = false;
+//const bool HAPLOID = false;
 
 
 //These two growth parameters set the timescale
