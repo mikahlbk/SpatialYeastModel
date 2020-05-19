@@ -1,4 +1,5 @@
-CC= -g++ -fopenmp -static-libstdc++
+CC= -g++ -fopenmp -static-libstdc++>=6.0.21
+
 
 CFLAGS=-c -Wall -O3
 

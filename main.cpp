@@ -30,6 +30,7 @@ double SINGLE_BOND_BIND_ENERGY = 25;
 double P_0 = 50;
 double r_LOGISTIC = 1;
 double A_LOGISTIC = 35;
+double K_MASS = 18*M_PI*pow(2.775,2);
 int main(int argc, char* argv[]) {
     //cout << "Starting" << endl;
     //reads in name of folder to store output for visualization
@@ -72,7 +73,7 @@ int main(int argc, char* argv[]) {
     //rightmost point for mesh
     int start_2 = 300;
     //each square unit on mesh will be this many units
-    double increment = 20.0;
+    double increment = 25.0;
 
     int num_buckets = 2*ceil(start_2/increment);
 
@@ -136,6 +137,7 @@ int main(int argc, char* argv[]) {
 		growing_Colony->find_bin();
 		//cout << "bins" << endl;
 	}
+	growing_Colony->update_growth_rates();
 	//growth
 	//cout << "grow" << endl;
 	growing_Colony->grow_cells();

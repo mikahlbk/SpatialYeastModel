@@ -192,6 +192,17 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
     return;
 }
+void Cell::update_growth_rate(){
+     double multiplier = this->get_nutrient_conc(this->bin_id);
+     this->G_one_length= this->G_one_length*multiplier;
+     return;
+}
+double Cell::get_nutrient_conc(int bin_id){
+     shared_ptr<Colony> my_colony= this->get_Colony();
+     shared_ptr<Mesh> my_mesh = my_colony->get_mesh();
+     double nutrient_conc = my_mesh->get_nutrient_conc(bin_id);
+     return nutrient_conc;
+}
 void Cell::get_daughters(vector<shared_ptr<Cell>>& daughter_cells){
      shared_ptr<Cell> this_cell = shared_from_this();
      daughter_cells = this_cell->daughters;
@@ -959,7 +970,7 @@ void Cell::print_txt_file_format(ofstream& ofs){
     for(unsigned int i = 0; i < lineages.size();i++){
     ofs << "/" << lineages.at(i);
     }
-    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << endl;
+    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << " " << bin_id << endl;
     //ofs << " " << this->get_color() << endl;
     return;
 }

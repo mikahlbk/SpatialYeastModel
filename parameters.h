@@ -39,7 +39,8 @@ const double average_G1_daughter = 75.0;
 const double size_at_div = 1.665;
 const double DIV_SHIFT_RADIANS = .174533;
 //const bool HAPLOID = false;
-
+//mass for logistic function for nutrient conc
+//double K_MASS = M_PI*pow(2.775,2.0);
 
 //These two growth parameters set the timescale
 const double k_g1 = .01;

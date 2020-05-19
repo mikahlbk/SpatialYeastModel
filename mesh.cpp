@@ -91,4 +91,10 @@ void Mesh::get_cells_from_bin(int& index, vector<shared_ptr<Cell>>& neighbors){
 	return;
 
 }
-
+double Mesh::get_nutrient_conc(int bin_id){
+	shared_ptr<Mesh_Pt> curr_mesh_pt = this->mesh_pts.at(bin_id).first;
+	double conc = curr_mesh_pt ->get_nutrient_conc();
+	return conc;
+}
+	
+	

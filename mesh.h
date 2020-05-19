@@ -36,6 +36,8 @@ class Mesh: public enable_shared_from_this<Mesh>{
 		void assign_neighbors();
 		void assign_cell_to_bin(int& index, shared_ptr<Cell>& new_cell);
 		void get_cells_from_bin(int& index, vector<shared_ptr<Cell>>& neighbors);
+		void calculate_nutrient_concentration();
+		double get_nutrient_conc(int bin_id);
 };
 
 //end mesh class

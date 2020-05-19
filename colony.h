@@ -60,6 +60,7 @@ class Colony: public enable_shared_from_this<Colony>{
 		void match_up();
 		void update_locations();
 		shared_ptr<Cell> return_cell(int cell_rank);
+		void update_growth_rates();
 		void update_protein_concentration();
         	void print_vtk_file(ofstream& ofs);
         	void write_data(ofstream& ofs);

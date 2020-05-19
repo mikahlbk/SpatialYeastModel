@@ -27,6 +27,7 @@ Mesh_Pt::Mesh_Pt(shared_ptr<Mesh>  my_mesh, double x, double y, int index){
 	this->my_mesh = my_mesh;
 	this->center = Coord(x, y);
 	this->index = index;
+	this->nutrient_conc = 1;
 	return;
 }
 void Mesh_Pt::find_neighbor_bins(){
@@ -68,5 +69,17 @@ void Mesh_Pt::add_cells_to_neighbor_vec(vector<shared_ptr<Cell>>& neighbor_cells
 }
 void Mesh_Pt::add_cell(shared_ptr<Cell>& new_cell){
 	this->cells.push_back(new_cell);
+	return;
+}
+void Mesh_Pt::calculate_nutrient_concentration(){
+	double curr_mass;
+	double total_mass = 0;
+	double multiplier; 
+	for(unsigned int i = 0;i<cells.size();i++){
+		curr_mass = M_PI*pow(cells.at(i)->get_radius(),2);
+		total_mass += curr_mass;
+	}
+	multiplier = this->nutrient_conc -(1-total_mass/K_MASS)*this->nutrient_conc*dt;
+	this->nutrient_conc = multiplier;
 	return;
 }

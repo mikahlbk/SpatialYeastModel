@@ -29,6 +29,7 @@ class Mesh_Pt: public enable_shared_from_this<Mesh_Pt>{
 		vector<shared_ptr<Cell>> cells;
 		shared_ptr<Mesh> my_mesh;
 		Coord center;
+		double nutrient_conc;
 		int index;
 		vector<shared_ptr<Mesh_Pt>> neighbors;
 	public:
@@ -42,6 +43,8 @@ class Mesh_Pt: public enable_shared_from_this<Mesh_Pt>{
 		void add_cells_to_neighbor_vec(vector<shared_ptr<Cell>>&  neighbor_cells);
 		void add_cell(shared_ptr<Cell>& new_cell);
 		void clear_cells_vec();
+		void calculate_nutrient_concentration();
+		double get_nutrient_conc(){return nutrient_conc;}
 };
 
 

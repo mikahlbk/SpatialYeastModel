@@ -168,7 +168,22 @@ void Colony::find_bin(){
 	}
 	return;
 }
-
+void Colony::update_growth_rates(){
+	//cout << "error in find bin?" << endl;
+	vector<shared_ptr<Mesh_Pt>> mesh_pts;
+	//cout << "get mesh" << endl;
+	my_mesh->get_mesh_pts_vec(mesh_pts);
+	//cout << "mesh pts loop" << endl;
+	#pragma omp parallel for schedule(static,1)
+	for(unsigned int i = 0; i< mesh_pts.size();i++){
+		mesh_pts.at(i)->calculate_nutrient_concentration();
+	}
+	#pragma omp parallel for schedule(static,1)
+	for(unsigned int i = 0; i< cells.size();i++){
+		cells.at(i)->update_growth_rate();
+	}
+	return;
+}
 void Colony::grow_cells(){
 	#pragma omp parallel for schedule(static,1)
 	for(unsigned int i = 0; i < cells.size(); i++){

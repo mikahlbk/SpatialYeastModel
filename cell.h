@@ -100,6 +100,8 @@ class Cell: public enable_shared_from_this<Cell>{
         	void reset_is_bud();
         	void reset_has_bud();
         	int get_bud_status();	
+		void update_growth_rate();	
+		double get_nutrient_conc(int bin_id);
 		void mother_bud_check();
 		void set_has_bud();
 		void change_mother_vars(shared_ptr<Cell> mother_cell,shared_ptr<Cell> bud_cell);
