@@ -16,8 +16,8 @@
 //Simulation Constants
 
 //time in minutes
-const int end_time = 1440;
-const int NUM_STEPS = 1000000;//100000;
+const int end_time = 2880;
+const int NUM_STEPS = 2000000;//100000;
 
 //timestep
 const double dt = (double)end_time/(double)NUM_STEPS;
@@ -25,23 +25,52 @@ const double dt = (double)end_time/(double)NUM_STEPS;
 //frequency of output for visualization
 const int OUTPUT_FREQ = 6250;
 
-//important constants 
-const double pi = 3.14;
-
 //Cell parameters
-const double G_one =  45.0;
-const double average_radius =  2.775;//microns
-const double average_G1_daughter = 75.0;
+const double average_G1_mother =  10.0;//minutes
+const double average_G2_mother = 80.0;//minutes
+const double average_radius =  3.1;//microns
+const double extra_G1_daughter = 40.0;//minutes
 //average length of G1 for daughter cell is 75 minutes
-//45 minutes is how long it stays on mother
-//this means size of daughter at division should be ~2.6 microns
-//not needed-const double average_growth_rate = average_radius/average_G1_daughter;
-const double size_at_div = 1.665;
+//45 minutes on mother, 30 minutes growing before
+//daughter forms new bud of its own
+const double size_at_div = 2.0;
 const double DIV_SHIFT_RADIANS = .174533;
-//const bool HAPLOID = false;
-//mass for logistic function for nutrient conc
-//double K_MASS = M_PI*pow(2.775,2.0);
 
+//adhesion between mother daughter cells
+//const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
+const double POISSON = .3;
+const double ELASTIC_MOD = 1000;
+const double K_ADH = 25;
+const double K_BEND = 8;
+const double ADHESION_STRENGTH = 12;
+const double k_axial_frac = .5;
+//chou model params
+const double k_r = 1; 
+const double k_a = .2;
+
+//signaling params
+//const double P_0 = 50;
+//const double r_LOGISTIC = 1;
+const double K_LOGISTIC = 100;
+//const double A_LOGISTIC = 20;
+//signaling params DNPM
+const double alpha = .0154;
+const double beta = 12;
+const double Gamma = .00008;
+const double mu = .0077;
+const int n_0 = 1;
+const int array_size = 4;
+const double eta =  5.0;
+const double THETA = .75;
+//const bool ADHESION_ON = true;
+const double SIGMA = .5;
+const double OMEGA = 500;
+//const double SINGLE_BOND_BIND_ENERGY = 25.0;
+const double RECEPTOR_SURF_DENSITY = 1E15;
+const double TEMPERATURE = 300;
+const double KB = 1.38E-23;
+
+//*************not using************************
 //These two growth parameters set the timescale
 const double k_g1 = .01;
 const double k_g2 = .01;
@@ -84,40 +113,7 @@ const double k_adhesion_mother_bud = 50;
 
 //adhesion between unrelated cells
 const double k_adhesion_cell_cell = .1;
+//**************************************************************
 
-
-//adhesion between mother daughter cells
-const double k_adhesion_mother_daughter = 2*k_adhesion_cell_cell;
-const double POISSON = .3;
-const double ELASTIC_MOD = 1000;
-const double K_ADH = 25;
-const double K_BEND = 8;
-const double ADHESION_STRENGTH = 12;
-const double k_axial_frac = .5;
-//chou model params
-const double k_r = 1; 
-const double k_a = .2;
-
-//signaling params
-//const double P_0 = 50;
-//const double r_LOGISTIC = 1;
-const double K_LOGISTIC = 100;
-//const double A_LOGISTIC = 20;
-//signaling params DNPM
-const double alpha = .0154;
-const double beta = 12;
-const double Gamma = .00008;
-const double mu = .0077;
-const int n_0 = 1;
-const int array_size = 4;
-const double eta =  5.0;
-const double THETA = .75;
-//const bool ADHESION_ON = true;
-const double SIGMA = .5;
-const double OMEGA = 500;
-//const double SINGLE_BOND_BIND_ENERGY = 25.0;
-const double RECEPTOR_SURF_DENSITY = 1E15;
-const double TEMPERATURE = 300;
-const double KB = 1.38E-23;
 
 #endif

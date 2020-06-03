@@ -3,10 +3,10 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
 #SBATCH --mem-per-cpu=2G
-#SBATCH --time=0-12:00:00
-#SBATCH --output=first_nutrient_tests_long_8.stdout
-#SBATCH --job-name="first_nutrient_tests_long_8"
-#SBATCH -p long.q 
+#SBATCH --time=0-4:00:00
+#SBATCH --output=hypothesis_sims_3.stdout
+#SBATCH --job-name="hypothesis_sims_3"
+#SBATCH -p fast.q 
 export OMP_NUM_THREADS 12
-mkdir Animate_first_nutrient_tests_long_8
-./program Animate_first_nutrient_tests_long_8 -ADH 0 -HAPLOID 1
+mkdir Animate_hypothesis_sims_3
+./program Animate_hypothesis_sims_3 -Budding 1 -division 2 -nutrient_decay .00027

@@ -34,7 +34,7 @@ class Colony: public enable_shared_from_this<Colony>{
 	private:
 		shared_ptr<Mesh> my_mesh;
 		mt19937 dist_generator;
-		vector<shared_ptr<Cell>> cells;
+		vector<shared_ptr<Cell>> my_cells;
 		
 	public:
 		//constructor
@@ -43,26 +43,26 @@ class Colony: public enable_shared_from_this<Colony>{
 		//make founder cell
         	//void make_founder_cell(string filename);
 		void make_founder_cell();
-		void make_founder_cell(string filename);
+		//void make_founder_cell(string filename);
 		double uniform_random_real_number(double a, double b);
 		//getters and setters
-		void get_Cells(vector<shared_ptr<Cell>>& new_cells);
-		void update_Colony_Cell_Vec(shared_ptr<Cell> new_cell);
-		int get_Num_Cells();
+		void get_colony_cell_vec(vector<shared_ptr<Cell>>& curr_cells);
+		void update_colony_cell_vec(shared_ptr<Cell> new_cell);
+		int get_num_cells();
 		shared_ptr<Mesh> get_mesh(){return my_mesh;}
 		//cell actions
 		void find_bin();
-		void pull_daughter();
+		//void pull_daughter();
 		void grow_cells();
 		void update_cell_cycles(int Ti);
         	void perform_budding(int Ti);
 		void perform_mitosis(int Ti);
-		void match_up();
+		//void match_up();
 		void update_locations();
-		shared_ptr<Cell> return_cell(int cell_rank);
+		//shared_ptr<Cell> return_cell(int cell_rank);
 		void update_growth_rates();
 		void update_protein_concentration();
-        	void print_vtk_file(ofstream& ofs);
+        	//void print_vtk_file(ofstream& ofs);
         	void write_data(ofstream& ofs);
 };
 

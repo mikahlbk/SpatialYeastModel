@@ -17,12 +17,103 @@
 #include "coord.h"
 #include "cell.h"
 #include "colony.h"
+#include "mesh_pt.h"
+#include "mesh.h"
 using namespace std;
 //****************************************
 //Public Member Functions for Cell.cpp
 
-//constructor
-Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int bud_status,int phase, double cell_prog,int Mother, int my_color){
+//Constructor for simulations starting with a single founder
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init_radius, double div_site){
+    this->my_colony = my_colony;
+    this->rank = rank;
+    this->cell_center = cell_center;
+    this->max_radius = average_radius + average_radius*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->curr_radius = max_radius;
+    this->at_max_size = false;
+    //curr_force set in function
+    //bin_id set in function
+    this->age = 0;
+    this->T_age = 0;
+    this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    //reset this after every mitosis because this determines the
+    // length of time the next daughterwill spend on the mother cell
+    this->G1 = true;
+    this->G2 = false;
+    this->S = false;
+    this->M = false;
+    this->growth_rate = max_radius/(my_G1_length);
+    this->cell_cycle_increment = 1.0/(my_G1_length + my_G2_length);
+    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
+    this->CP = .1;
+    this->is_mother = false;
+    this->has_bud = false;
+    //curr_bud assigned in budding function
+    //each new daughter is added to daughters vec in budding function
+    this->curr_div_site = div_site;
+    this->div_site_vec.push_back(curr_div_site);
+    this->is_bud = false;
+    //set in make founder function
+    this->mother_rank = rank;  
+    //lineage vec filled out in make founder function
+    griesemer_lineage.push_back(0);
+    this->sector = 0;
+    
+    //**** get rid of these ASAP****
+    this->curr_protein = P_0;
+    this->color = 0;
+    //*************************
+ 
+    return;
+}
+//Constructor for new daugher after division
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mother,int mother_rank, double div_site, vector<int> lineage, vector<int>g_lineage,int sector, int my_col, double g_two_from_mother){
+    this->my_colony = my_colony;
+    this->rank = rank;
+    this->cell_center = cell_center;
+    this->curr_radius = init_radius;
+    this->max_radius = average_radius + average_radius*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+ ;
+    this->at_max_size = false;
+    //curr_force set in function
+    //bin id assigned in function
+    this->age = 0;
+    this->T_age = 0;
+    this->my_G1_length = g_two_from_mother + extra_G1_daughter + extra_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->G1 = true;
+    this->G2 = false;
+    this->S = false;
+    this->M = false;
+    this->growth_rate = max_radius/(my_G1_length + my_G2_length);
+    this->cell_cycle_increment = 1.0/(my_G1_length + my_G2_length);
+    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
+    this->CP = 0;
+    this->is_mother = false;
+    this->has_bud = false;
+    //curr_bud assigned in function
+    //daughters vector updated in function
+    this->curr_div_site = div_site;
+    this->div_site_vec.push_back(curr_div_site);
+    this->is_bud = true;
+    this->mother = mother;
+    this->mother_rank = mother_rank;
+    this->lineage = lineage;
+    this->griesemer_lineage = g_lineage;
+    this->sector = sector;
+   
+    //******get rid of these ASAP**********
+    this->equi_point = cell_center;
+    this->curr_protein = 0;
+    this->at_max_size = false;
+    this->color = my_col;
+    //**************************************
+
+    return;
+}
+//constructor for starting with multiple cells
+/*Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int bud_status,int phase, double cell_prog,int Mother, int my_color){
     //cout << "im in" << endl;
     this->my_colony = my_colony;
     this->rank = rank;
@@ -82,8 +173,9 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max
     griesemer_lineage.push_back(0);
     this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
     return;
-}
-void Cell::mother_bud_check(){
+}*/
+//**********functions only to be used when starting colony with multiple cells*****************
+/*void Cell::mother_bud_check(){
      shared_ptr<Cell> this_cell = shared_from_this();
      if(this->is_bud){
      	change_mother_vars(this->mother,this_cell);
@@ -112,39 +204,6 @@ void Cell::change_mother_vars(shared_ptr<Cell> mother_cell, shared_ptr<Cell> bud
      return;
 }
 
-Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site){
-    this->my_colony = my_colony;
-    this->rank = rank;
-    this->cell_center = cell_center;
-    this->max_radius = max_radius;
-    this->curr_radius = init_radius;
-    this->age = 0;
-    this->T_age = 0;
-    this-> CP = CP;
-    this->G1 = true;
-    this->G_one_length = G_one + G1*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    //cout << "G1" << G_one << " " << G_one_length << endl;
-    this->G2 = false;
-    this->S = false;
-    this->M = false;
-    this->is_mother = true;
-    this->mother = nullptr;
-    this->curr_bud = nullptr;
-    this->is_bud = false;
-    this->has_bud = false;
-    this->equi_point = cell_center;
-    this->curr_protein = P_0;
-    this->curr_div_site = div_site;
-    this->div_site_vec.push_back(curr_div_site);
-    this->sector = 0;
-    this->at_max_size = true;
-    this->slow_grow = false;
-    //this->lineage.push_back(0);
-    //is vector
-    griesemer_lineage.push_back(0);
-    this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
-    return;
-}
 void Cell::return_bud_status(){
 	int my_rank = this->rank;
 	int my_bud_rank;
@@ -158,71 +217,37 @@ void Cell::return_bud_status(){
 	}
 	int phase = this->get_phase();
 	cout << "rank: " << this->rank << "bud: " << my_bud_rank   << "phase: " << phase << endl;
-}
-Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double max_radius, double init_radius, shared_ptr<Cell> mother, double protein, double div_site, vector<shared_ptr<Cell>> lineage, vector<int>g_lineage,int sector, int bin_id,int my_col){
-    this->my_colony = my_colony;
-    this->rank = rank;
-    this->cell_center = cell_center;
-    this->max_radius = max_radius;
-    this->curr_radius = init_radius;
-    this->age = 0;
-    this->T_age = 0;
-    this-> CP = 0;
-    this->G1 = true;
-    this->G_one_length = G_one + G1*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    this->G2 = false;
-    this->S = false;
-    this->M = false;
-    this->is_mother = false;
-    this->mother = mother;
-    this->curr_bud = nullptr;
-    this->is_bud = true;
-    this->has_bud = false;
-    this->equi_point = cell_center;
-    this->curr_protein = protein;
-    this->curr_div_site = div_site;
-    this->div_site_vec.push_back(curr_div_site);
-    this->sector = sector;
-    this->at_max_size = false;
-    this->lineage = lineage;
-    this->griesemer_lineage = g_lineage;
-    this->bin_id = bin_id;
-    this->slow_grow = false;
-    this->color = my_col;
-    this->growth_rate = max_radius/((average_G1_daughter) + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100));
-    return;
-}
-void Cell::update_growth_rate(){
-     double multiplier = this->get_nutrient_conc(this->bin_id);
-     this->G_one_length= this->G_one_length*multiplier;
+}*/
+//*************************************************************************************************
+
+//***getters&setters that need a function,in order of cell.h***
+void Cell::set_mother(shared_ptr<Cell> mother){
+     this->mother = mother;
      return;
 }
-double Cell::get_nutrient_conc(int bin_id){
-     shared_ptr<Colony> my_colony= this->get_Colony();
-     shared_ptr<Mesh> my_mesh = my_colony->get_mesh();
-     double nutrient_conc = my_mesh->get_nutrient_conc(bin_id);
-     return nutrient_conc;
-}
-void Cell::get_daughters(vector<shared_ptr<Cell>>& daughter_cells){
+void Cell::get_daughters_vec(vector<shared_ptr<Cell>>& curr_daughters){
      shared_ptr<Cell> this_cell = shared_from_this();
-     daughter_cells = this_cell->daughters;
+     curr_daughters = this_cell->daughters;
      return;
 }
-void Cell:: get_lineage_vec(vector<shared_ptr<Cell>>& new_lineages){
-     new_lineages = this->lineage;
+void Cell::get_div_site_vec(vector<double>& previous_div_sites){
+     shared_ptr<Cell> this_cell = shared_from_this();
+     previous_div_sites = this_cell->div_site_vec;
      return;
 }
-void Cell:: get_lineage_g_vec(vector<int>& new_g_lineages){
-    new_g_lineages = this->griesemer_lineage;
-    return;
+void Cell::get_lineage_vec(vector<int>& curr_lineage_vec){
+     shared_ptr<Cell> this_cell = shared_from_this();
+     curr_lineage_vec = this_cell->lineage;
+     return;
 }
-void Cell::add_daughter(shared_ptr<Cell> daughter){
-    this->daughters.push_back(daughter);
-    return;
+void Cell::update_lineage_vec(int cell_rank){
+     this->lineage.push_back(cell_rank);
+     return;
 }
-void Cell::update_lineage_vec(shared_ptr<Cell> me){
-	lineage.push_back(me);
-	return;
+void Cell::get_griesemer_lineage_vec(vector<int>& curr_griesemer_lineage){
+     shared_ptr<Cell> this_cell = shared_from_this();
+     curr_griesemer_lineage = this_cell->griesemer_lineage;
+     return;
 }
 int Cell::get_phase(){
 	if(this->G1){
@@ -235,15 +260,15 @@ int Cell::get_phase(){
 		return 4;
 	}
 }
+//****functions in order of cell.h***
 void Cell::find_bin(){
      shared_ptr<Cell> this_cell = shared_from_this();	
      vector<shared_ptr<Mesh_Pt>> mesh_pts;
-     this->get_Colony()->get_mesh()->get_mesh_pts_vec(mesh_pts);
-     double smallest_dist=100000;
+     this->get_colony()->get_mesh()->get_mesh_pts_vec(mesh_pts);
+     double smallest_dist=1000000;
      int smallest_index;
      double curr_dist;
-     //cout << "Smallest index before starting" << smallest_index << endl;
-     //#pragma omp parallel for reduction(min:smallest_index)
+     //cout << "smallest index before starting" << smallest_index << endl;
      for(unsigned int i = 0; i< mesh_pts.size();i++){
      	curr_dist = (this->cell_center - mesh_pts.at(i)->get_center()).length();
 	if(curr_dist < smallest_dist){
@@ -254,11 +279,328 @@ void Cell::find_bin(){
      }
      //push cell back onto cell vector for that index
      //cout << "smallest index " << smallest_index << endl;
-     this->my_colony->get_mesh()->assign_cell_to_bin(smallest_index, this_cell);
+     this->my_colony->get_mesh()->assign_cell_to_bin(smallest_index,this_cell);
      this->bin_id = smallest_index;
      return;
 }
-void Cell::slow_grow_on(){
+void Cell::update_growth_rate(){
+     double multiplier = this->get_nutrient_conc(bin_id);
+     if(multiplier > .1){
+	this->cell_cycle_increment = this->theoretical_cci;
+     }else{
+	this->cell_cycle_increment = this->theoretical_cci*multiplier;
+     }
+     //cout << "Nutrient Conc: " << multiplier << "Cell cycle: " << cell_cycle_increment << endl; 
+     return;
+}
+double Cell::get_nutrient_conc(int curr_bin_id){
+     shared_ptr<Colony> my_colony= this->get_colony();
+     shared_ptr<Mesh> my_mesh = my_colony->get_mesh();
+     double nutrient_conc = my_mesh->get_nutrient_conc(curr_bin_id);
+     return nutrient_conc;
+}
+void Cell::grow_cell(){
+    if(!at_max_size){
+     	//cout << "Rank " << rank << " size " << curr_radius << "set max size " << max_radius << endl;
+	curr_radius = curr_radius + growth_rate*dt;
+	//cout << "Rank: " << rank << "Curr radius: " << curr_radius << endl;
+    }
+    if(curr_radius >= max_radius){
+	//cout << "made it" << endl;
+	this->at_max_size = true;
+    }
+    return;
+}
+void Cell::update_cell_cycle(){
+     this->T_age++;
+     shared_ptr<Cell> this_cell = shared_from_this();
+     if(this->G1 && this->CP >= .1 && this->age >0){
+     	//cout << "cell cycle" << cell_cycle_increment << "actual " << CP << endl;
+	this->G1 = false;
+	this->S = true;
+     }
+     else if(this->G1 && this->CP >= 1 && this->age < 1){
+	this->G1 = false;
+	this->S = true;
+     }
+     if(is_bud && (curr_radius >= size_at_div)){
+	this_cell->get_mother()->enter_mitosis();
+     }
+     //cout << "cell cycle" << cell_cycle_increment << "actual " << CP << endl;
+     CP = CP + cell_cycle_increment*dt;	
+     //cout << "cell cycle" << cell_cycle_increment << "actual " << CP << endl;
+	
+     return;
+}
+void Cell::enter_mitosis(){
+     G1 = false;
+     S = false;
+     G2 = false;
+     M = true;
+     return;
+}
+void Cell::perform_budding(int Ti){
+    //cout << "Rank: " << this->get_rank() << "Bud Formed: " << Ti << "Curr Radius: " << this->curr_radius << endl;
+    //increment budding age
+    this-> age = age+1;
+    shared_ptr<Cell> this_cell = shared_from_this();
+    shared_ptr<Colony> this_colony = this->get_colony();
+    int daughter_cell_rank = this_colony->get_num_cells();
+    double daughter_init_radius = 0;
+    double mother_division_site;
+    bool used = false;
+    
+    if(Division_Pattern==0){//axial
+    	mother_division_site = this->curr_div_site;//axial same side
+    }else if(Division_Pattern == 1){//bipolar
+	mother_division_site = this->curr_div_site + M_PI;//bipolar opposite side
+    }else if(Division_Pattern == 2){//mixed
+	if(mother_status()){
+		//50% chance axial or bipolar
+		if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
+			mother_division_site = this->curr_div_site;
+		}else{
+			mother_division_site = this->curr_div_site + M_PI;
+		}
+	}else{
+		mother_division_site = this->curr_div_site + M_PI;
+	}
+    }    
+    //50% chance move up or down a little
+    if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
+    	//move 10 degrees counter clockwise until new spot found
+    	do{	
+		used = false;
+		mother_division_site = mother_division_site + DIV_SHIFT_RADIANS;
+		for(unsigned int i = 0;i<this->div_site_vec.size();i++){
+			if(mother_division_site == div_site_vec.at(i)){
+				used = true;
+			}	
+		}	
+     	}while(used);
+     }else{
+	//move 10 degress clockwise until new spot found
+	do{
+		used = false;
+		mother_division_site = mother_division_site - DIV_SHIFT_RADIANS;
+		for(unsigned int i = 0;i<this->div_site_vec.size();i++){
+			if(mother_division_site == div_site_vec.at(i)){
+				used = true;
+			}
+		}
+	}while(used);
+    }
+    //update mother division site vector
+    this->div_site_vec.push_back(mother_division_site);
+    this->curr_div_site = mother_division_site;
+    //cout << "rank " << this-> rank << " divsite " << division_site << endl;
+    double new_center_x = this->cell_center.get_X()+(curr_radius+daughter_init_radius)*cos(curr_div_site);
+    double new_center_y = this->cell_center.get_Y()+(curr_radius+daughter_init_radius)*sin(curr_div_site);
+    Coord new_center = Coord(new_center_x,new_center_y);
+    vector<int> new_lineage;
+    this->get_lineage_vec(new_lineage);
+    if(this->rank != 0){
+    	new_lineage.push_back(this->rank);
+    }
+    vector<int> new_g_lineage;
+    this->get_griesemer_lineage_vec(new_g_lineage);
+    new_g_lineage.push_back(this->age);
+    int sector;
+    if(this->rank == 0){
+    	sector = this-> age;
+    }
+    else{
+    	sector = this->sector;
+    }
+    //cout << "New cell rank: " << new_rank << endl;
+    //****new cell stuff***
+    auto new_cell = make_shared<Cell>(this_colony, daughter_cell_rank, new_center, daughter_init_radius,this_cell,this->rank,mother_division_site+M_PI,new_lineage, new_g_lineage, sector,this->color,this->my_G2_length);
+    new_cell->find_bin();
+    //***mother cell stuff***
+    this->G1 = false;
+    this->S = false;
+    this->G2 = true;
+    this->M = false;
+    this->is_mother = true;
+    this->has_bud = true;
+    this->curr_bud = new_cell;
+    this->daughters.push_back(new_cell);
+    this->div_site_vec.push_back(mother_division_site);
+    //**colony stuff***
+    this_colony->update_colony_cell_vec(new_cell);
+    this->equi_point = Coord(curr_radius*cos(mother_division_site + M_PI/2),curr_radius*sin(mother_division_site + M_PI/2));
+    return;
+}
+void Cell::perform_mitosis(int Ti){
+    //separate mother and daughter
+    //cout << "reset is bud" << endl;
+    //cout << "mitosis time " << Ti << " " << this->get_rank() << endl;
+    //cout << this->curr_bud << endl;
+    double bud_prot = this->curr_protein*.4;
+    double mother_prot = this->curr_protein*.6;
+    //cout << "Mother before: " << mother_prot << " " << bud_prot << endl;
+    this->set_protein_conc(this->curr_protein*.6);
+    this->curr_bud->set_protein_conc(bud_prot);
+    this->set_has_bud_to_false();
+    this->curr_bud->set_is_bud_to_false(); 
+    this->G1 = true;
+    this->S = false;
+    this->G2 = false;
+    this->M = false;
+    this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
+    this->cell_cycle_increment = theoretical_cci;
+    this->CP = 0;
+    //daughter remains G1 and mother gets set to G1
+    return;
+}
+void Cell::set_has_bud_to_false(){
+    this->has_bud = false;
+    return;
+}
+void Cell::set_is_bud_to_false(){
+    this->is_bud = false;
+    return;
+}
+void Cell::compute_protein_concentration(){
+    if(!is_bud){
+	this->curr_protein = curr_protein + r_LOGISTIC*curr_protein*(1-curr_protein/K_LOGISTIC)*(curr_protein/A_LOGISTIC -1)*dt;
+    //this->curr_protein = curr_protein + r_LOGISTIC*curr_protein*(1-curr_protein/K_LOGISTIC);
+    }
+    return;
+}
+void Cell::set_protein_conc(double protein){
+	this->curr_protein = protein;
+	return;
+}
+void Cell::get_cell_force(){
+    Coord force;
+    vector<shared_ptr<Cell>> neighbor_cells;
+    this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id,neighbor_cells);
+    shared_ptr<Cell> this_cell = shared_from_this();
+    #pragma omp parallel
+    {
+    	#pragma omp declare reduction(+:Coord:omp_out+=omp_in) initializer(omp_priv(omp_orig))
+	#pragma omp for reduction(+:force) schedule(static,1)
+	for(unsigned int i = 0; i< neighbor_cells.size();i++){
+    		if(neighbor_cells.at(i) != this_cell){
+			//cout << "force on cell: " << i << endl;
+			force += this_cell->calc_forces_Hertz(neighbor_cells.at(i));
+		}
+	}
+     }
+     this->curr_force = force;
+     return;
+}
+Coord Cell::calc_forces_Hertz(shared_ptr<Cell> my_neighbor){
+    //Describe force calculation in README!!!
+    //vector<shared_ptr<Cell>> neighbor_cells;
+    Coord my_loc = cell_center;
+    double my_radius = curr_radius;
+    Coord neighbor_loc;
+    double neighbor_radius;
+    Coord rep_force = Coord(0,0);
+    Coord adh_force = Coord(0,0);
+    Coord adh_force_reg = Coord(0,0);
+    Coord bending_force = Coord(0,0);
+    //distance between two cell centers
+    double d_ij;
+    //vector for direction of force
+    Coord v_ij;
+    double E_ij_inverse = 1/((3.0/4.0)*(2*(1-pow(POISSON,2))/ELASTIC_MOD));
+    double sqrt_term;
+    //bending force necessities
+    //the angle made by my cell center, mom cell center and equilibrium point on mom membrane
+    double curr_angle;
+    //equilibrium angle is 90
+    double eps = 0.0001;
+    Coord mom_center = this->mother->get_cell_center();
+    //Coord equi_point = this->mother->get_equi_point();
+    shared_ptr<Cell> this_cell = shared_from_this();
+    //for(unsigned int i = 0; i< neighbor_cells.size();i++){
+    	if(my_neighbor != this_cell){
+		neighbor_loc = my_neighbor->get_cell_center();
+		neighbor_radius = my_neighbor->get_curr_radius();
+		d_ij = (my_loc-neighbor_loc).length();
+		v_ij = (my_loc - neighbor_loc);
+		sqrt_term = sqrt((my_radius*neighbor_radius)/(my_radius+neighbor_radius));
+		if(Budding_On == 1){
+			//cout << "ADH_VARIABLE == " << ADH_ON << endl;
+			//ADHESION_ON IS A BOOLEAN IN PARAMETERS FILE
+			//turns in adhesion between mother and bud
+			if((my_neighbor == curr_bud)){
+                		if(this->has_bud){
+                        		//cout << "Cell rank " << this->rank << " has daughter " << this->curr_bud->get_rank() << endl;
+					//if(my_radius+neighbor_radius - d_ij < 0){
+                        			adh_force += v_ij*-1*K_ADH*(d_ij-(my_radius+neighbor_radius));
+					//}
+                    		}
+                    	}
+			else if((my_neighbor == mother)){
+                       		if(this->is_bud){
+                        		//if(my_radius+neighbor_radius - d_ij < 0){
+                        			adh_force += v_ij*-1*K_ADH*(d_ij-(my_radius+neighbor_radius));
+						//curr_angle = this->compute_angle();
+						//if(abs(curr_angle - pi/2) < eps){
+							//do nothing theyre close
+						//}
+						/*else{
+							double bend_constant = K_BEND*(curr_angle-pi/2)/(sqrt(1-pow(cos(curr_angle),2)));
+							Coord me_to_mom = mom_center- cell_center;
+							double me_to_mom_length = me_to_mom.length();
+							Coord mom_to_equi_point = equi_point-mom_center;
+							double mom_to_equi_point_length = mom_to_equi_point.length();
+							Coord term1 = mom_to_equi_point/(mom_to_equi_point_length*me_to_mom_length);
+							Coord term2 = me_to_mom*cos(curr_angle)/pow(me_to_mom_length,2);
+							bending_force = (term1 + term2)*bend_constant;
+						}*/
+					//}
+				}
+			}
+		}	
+		if(my_radius + neighbor_radius - d_ij >= 0){
+			rep_force += v_ij*.5*(1/d_ij)*pow(my_radius+neighbor_radius -d_ij,1.5)*E_ij_inverse*sqrt_term;
+			//cout << "rep_force" << rep_force << endl;
+		}
+		if((my_radius + neighbor_radius - d_ij < 1) && (my_radius + neighbor_radius - d_ij > -1)){
+			adh_force_reg += v_ij*SINGLE_BOND_BIND_ENERGY*RECEPTOR_SURF_DENSITY*KB*TEMPERATURE*M_PI*(my_radius + neighbor_radius)*.5*-1;
+		}		
+		
+		
+	
+     }
+     //cout << "Rep_force" << rep_force << endl;
+     //Coord unit_vec = (rep_force + adh_force + adh_force_reg);
+     //double length_vec =  (rep_force + adh_force + adh_force_reg).length();
+     //cout  <<"unit vec" << unit_vec<< "length" << length_vec <<  endl;
+     curr_force = rep_force + adh_force + adh_force_reg;
+     //cout <<"curr force"  << curr_force << endl;// + adh_force;// + bending_force;
+     return curr_force;
+}
+void Cell::update_location(){
+    cell_center = cell_center + curr_force*1.0/(1+(curr_radius/2))*dt;
+    return;
+}
+void Cell::print_txt_file_format(ofstream& ofs){
+    ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << " ";
+    for(unsigned int i = 0; i < this->griesemer_lineage.size();i++){
+    	ofs << "/" << griesemer_lineage.at(i);
+    }
+    ofs << " ";
+    //cout << "getting vec" << endl;
+    vector<int> lineages;
+    get_lineage_vec(lineages);
+    //cout << "lineages loop" << endl;
+    for(unsigned int i = 0; i < lineages.size();i++){
+    ofs << "/" << lineages.at(i);
+    }
+    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << " " << bin_id << endl;
+    //ofs << " " << this->get_color() << endl;
+    return;
+}
+//*******OLD******************
+/*void Cell::slow_grow_on(){
 	this->slow_grow = true;
 }
 void  Cell::return_lineage_vec(vector<int> & ranks){
@@ -324,31 +666,9 @@ void Cell::set_is_mother(){
 void Cell::set_at_max_size(){
 	this->at_max_size = true;
 }
+
+ 
 void Cell::grow_cell(){
-     if(!is_mother){
-		if(!at_max_size && curr_radius >= max_radius){
-			//cout << "Rank " << rank << " size " << curr_radius << "set max size " << endl;
-			this->at_max_size = true;
-			this->CP = 0;
-			//cout << "progress " << CP << endl;
-		}
-		else if (!at_max_size){
-			if(this->far_enough_from_neighbors()){
-				curr_radius = curr_radius + growth_rate*dt;
-				//cout << "Rank: " << rank << "Curr radius: " << curr_radius << endl;
-			}
-    		}	
-     }
-     return;
-}
-void Cell::compute_protein_concentration(){
-    if(!is_bud){
-	this->curr_protein = curr_protein + r_LOGISTIC*curr_protein*(1-curr_protein/K_LOGISTIC)*(curr_protein/A_LOGISTIC -1)*dt;
-    //this->curr_protein = curr_protein + r_LOGISTIC*curr_protein*(1-curr_protein/K_LOGISTIC);
-    }
-    return;
-} 
-/*void Cell::grow_cell(){
 	curr_radius = curr_radius + growth_rate*dt;
 	return;
 }
@@ -358,255 +678,8 @@ void Cell::update_cell_cycle(int Ti){
 		S = true;
 	}
 	return;
-}*/
-void Cell::update_cell_cycle(int Ti){
-	shared_ptr<Cell> this_cell = shared_from_this();
-	if(at_max_size && G1){
-		//cout << 2.1/G_one_length << " " << G_one_length << endl;
-		this->CP = CP + (1/G_one_length)*dt;
-		//cout << "Rank" << rank<<  "Cell Prog" << CP << endl;
-	}
-	if((CP>=1) && G1){
-		S = true;
-		//cout << "Rank" << rank << "gets bud" << endl;
-		//this->perform_budding(Ti);
-	}
-	if(is_bud){
-		if(curr_radius >= size_at_div){
-			//cout << "Rank" << rank << "is bud off" << endl;
-			this_cell->get_mother()->enter_mitosis(Ti);
-			//this_cell->perform_mitosis(Ti);
-		}
-	}	
-	return;
 }
 
-void Cell::enter_mitosis(int Ti){
-     G1 = false;
-     S = false;
-     G2 = false;
-     M = true;
-     return;
-}
-
-void Cell::perform_budding(int Ti){
-    //make bud
-    //cout << "Rank: " << this->get_rank() << "Bud Formed: " << Ti << "Curr Radius: " << this->curr_radius << endl;
-    this-> age = age+1;
-    shared_ptr<Cell> this_cell = shared_from_this();
-    shared_ptr<Colony> this_colony = this->get_Colony();
-    int new_rank = this_colony->get_Num_Cells();
-    double init_radius = 0;
-    double new_division_site;
-    bool used = false;
-    uniform_real_distribution<> dis(0.0,1.0);
-		
-    if(HAPLOID){
-    	new_division_site = curr_div_site;
-	//cout << "new site: " << new_division_site << endl;
-	if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
-	//move 10 degrees up until new
-	do{
-		used = false;
-		//cout << "stuck in while" << endl;
-		new_division_site = new_division_site - DIV_SHIFT_RADIANS;
-		for(unsigned int i=0;i<this->div_site_vec.size();i++){
-			if(new_division_site == div_site_vec.at(i)){
-				used = true;
-			}
-		}	
-	}while(used);
-	}else{
-	//move 10 down until new
-	do{
-		used = false;
-		//cout << "stuck in while" << endl;
-		new_division_site = new_division_site + DIV_SHIFT_RADIANS;
-		for(unsigned int i=0;i<this->div_site_vec.size();i++){
-			if(new_division_site == div_site_vec.at(i)){
-				used = true;
-			}
-		}	
-	}while(used);	
-	}
-    }else{
-    	//if(is_mother){//need a mother check here
-        	//mother has 50% chance opposite or adjacent
-		//if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
-			//opposite
-			//cout << "Rank: " << rank << endl;
-			//cout << "current: " << curr_div_site << endl;
-			new_division_site = curr_div_site + pi;
-			if(new_division_site > 2*pi){
-				new_division_site = new_division_site - 2*pi;
-			}
-			//cout << "new site: " << new_division_site << endl;
-			//scan through current vector to determine if this site was used before
-			for(unsigned int i=0;i<this->div_site_vec.size();i++){
-				if(new_division_site == div_site_vec.at(i)){
-					used = true;
-					//cout << "used true" << endl;
-				}
-			}	
-			//if not used new_division_site is unchanged
-			//if used decide to move up or down
-			if(used){
-				//cout << "got in here " << endl;
-				if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
-					//move up
-					do{
-						used = false;
-						//cout << "Stuck in while???" << endl;
-						new_division_site = new_division_site - DIV_SHIFT_RADIANS;
-						for(unsigned int i=0;i<this->div_site_vec.size();i++){
-							if(new_division_site == div_site_vec.at(i)){
-								used = true;
-							}
-						}	
-					}while(used);	
-			
-				}
-				else{
-					//move down
-					do{
-						used = false;
-						//cout << "stuck in while false???" << endl;
-						new_division_site = new_division_site + DIV_SHIFT_RADIANS;
-						for(unsigned int i=0;i<this->div_site_vec.size();i++){
-							if(new_division_site == div_site_vec.at(i)){
-								used = true;
-							}
-						}	
-					}while(used);	
-				}
-			}	
-		//}
-	/*	else{
-			//adjacent or same side
-			//cout << "Rank: " << rank << endl;
-			//cout << "current: " << curr_div_site << endl;
-			new_division_site = curr_div_site;
-			//cout << "new site: " << new_division_site << endl;
-			
-			if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
-				//move 10 degrees up until new
-				do{
-					used = false;
-					//cout << "stuck in while" << endl;
-					new_division_site = new_division_site - DIV_SHIFT_RADIANS;
-					for(unsigned int i=0;i<this->div_site_vec.size();i++){
-						if(new_division_site == div_site_vec.at(i)){
-							used = true;
-						}
-					}	
-				}while(used);	
-			}	
-			else{
-				//move 10 down until new
-				do{
-					used = false;
-					//cout << "stuck in while" << endl;
-					new_division_site = new_division_site + DIV_SHIFT_RADIANS;
-					for(unsigned int i=0;i<this->div_site_vec.size();i++){
-						if(new_division_site == div_site_vec.at(i)){
-							used = true;
-						}
-					}	
-				}while(used);	
-			}
-
-		}
-        }
-	else{ 
-		//is daughter
-		new_division_site = curr_div_site + pi;
-		set_is_mother();
-	}*/
-	
-    }
-    
-    //new_division_site = 2*pi*this->get_Colony()->uniform_random_real_number(0.0,1.0);
-    //uniform_real_distribution<> div_dist(0.0,1.0);
-     //new_division_site = pi*(this->get_Colony()->uniform_random_real_number(0.0,1.0));
-     
-    this->div_site_vec.push_back(new_division_site);
-    this->curr_div_site = new_division_site;
-    //cout << "rank " << this-> rank << " divsite " << division_site << endl;
-    double new_max_radius = average_radius + average_radius*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100);
-    /*double new_center_x_D = this->cell_center.get_X()+(init_radius)*cos(curr_div_site);
-    double new_center_y_D = this->cell_center.get_Y()+(init_radius)*sin(curr_div_site);
-    double new_center_x_M = this->cell_center.get_X()+(init_radius)*cos(curr_div_site+pi);
-    double new_center_y_M = this->cell_center.get_Y()+(init_radius)*sin(curr_div_site+pi);*/
-    //double new_center_x_M = this->cell_center.get_Y();
-    double new_center_x = this->cell_center.get_X()+(curr_radius+init_radius)*cos(curr_div_site);
-    double new_center_y = this->cell_center.get_Y()+(curr_radius+init_radius)*sin(curr_div_site);
-    Coord new_center = Coord(new_center_x,new_center_y);
-    double protein = this->get_protein_conc();
-    this->curr_protein = curr_protein;
-    vector<shared_ptr<Cell>> new_lineage;
-    this->get_lineage_vec(new_lineage);
-    if(this->rank != 0){
-    	new_lineage.push_back(this_cell);
-    }
-    int sector;
-    vector<int> new_lineage_g;
-    this->get_lineage_g_vec(new_lineage_g);
-    new_lineage_g.push_back(this->age);
-    if(this->rank == 0){
-    	sector = this-> age;
-    }
-    else{
-    	sector = this->sector;
-    }
-	//cout << "New cell rank: " << new_rank << endl;
-    auto new_cell = make_shared<Cell>(this_colony, new_rank, new_center,new_max_radius, init_radius,this_cell,protein, new_division_site+pi, new_lineage, new_lineage_g, sector, this->bin_id,this->color);
-    my_colony->get_mesh()->assign_cell_to_bin(this->bin_id,new_cell);
-    this->add_daughter(new_cell);
-    this->curr_bud = new_cell;
-    this->has_bud = true;
-    this->CP = 0;
-    //this->curr_radius = init_radius;
-    //this->cell_center = Coord(new_center_x_M,new_center_y_M); 
-    G1 = false;
-    S = false;
-    G2 = true;
-    M = false;
-    /*if(this->slow_grow){
-    	new_cell->slow_grow_on();
-    }
-    else if(this->get_Colony()->uniform_random_real_number(0.0,1.0) <= .5){
-    	new_cell->slow_grow_on();
-	new_cell->change_gr();
-    }*/
-    this_colony->update_Colony_Cell_Vec(new_cell);
-    //new cell is G1 and old cell is G2
-    this->equi_point = Coord(curr_radius*cos(new_division_site + pi/2),curr_radius*sin(new_division_site + pi/2));
-    return;
-}
-void Cell::set_protein_conc(double protein){
-	this->curr_protein = protein;
-	return;
-}
-void Cell::perform_mitosis(int Ti){
-    //separate mother and daughter
-    //cout << "reset is bud" << endl;
-    //cout << "mitosis time " << Ti << " " << this->get_rank() << endl;
-    //cout << this->curr_bud << endl;
-    double bud_prot = this->curr_protein*.4;
-    double mother_prot = this->curr_protein*.6;
-    //cout << "Mother before: " << mother_prot << " " << bud_prot << endl;
-    this->set_protein_conc(this->curr_protein*.6);
-    this->curr_bud->set_protein_conc(bud_prot);
-    //cout << "Mother: " << this->get_protein() << " " << curr_protein << " Bud: " << this->curr_bud->get_protein() << endl;
-   
-    this->curr_bud->reset_is_bud();
-    //cout << "reset has bud" << endl;
-    this->reset_has_bud(); 
-   M = false;
-    G1 = true;
-    //daughter remains G1 and mother gets set to G1
-    return;
-}
 void Cell::pull_daughter(){
 	if(is_bud){
 		//pulling force
@@ -662,115 +735,6 @@ double Cell::compute_distance(shared_ptr<Cell> neighbor_cell){
 	distance = curr_radius + neighbor_cell->get_radius() - d_ij;
 	return distance;
 }
-void Cell::get_cell_force(){
-    this->T_age++;
-    Coord force;
-    vector<shared_ptr<Cell>> neighbor_cells;
-    this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id, neighbor_cells);
-    //this->my_colony->get_Cells(neighbor_cells);
-    shared_ptr<Cell> this_cell = shared_from_this();
-    #pragma omp parallel
-    {
-    	#pragma omp declare reduction(+:Coord:omp_out+=omp_in) initializer(omp_priv(omp_orig))
-	#pragma omp for reduction(+:force) schedule(static,1)
-	for(unsigned int i = 0; i< neighbor_cells.size();i++){
-    		if(neighbor_cells.at(i) != this_cell){
-			//cout << "force on cell: " << i << endl;
-			force += this_cell->calc_forces_Hertz(neighbor_cells.at(i));
-		}
-	}
-     }
-     this->curr_force = force;
-     return;
-}
-Coord Cell::calc_forces_Hertz(shared_ptr<Cell> my_neighbor){
-    //Describe force calculation in README!!!
-    //vector<shared_ptr<Cell>> neighbor_cells;
-    //this->my_colony->get_mesh()->get_cells_from_bin(this->bin_id, neighbor_cells);
-    //this->my_colony->get_Cells(neighbor_cells);
-    Coord my_loc = cell_center;
-    double my_radius = curr_radius;
-    Coord neighbor_loc;
-    double neighbor_radius;
-    Coord rep_force = Coord(0,0);
-    Coord adh_force = Coord(0,0);
-    Coord adh_force_reg = Coord(0,0);
-    Coord bending_force = Coord(0,0);
-    //distance between two cell centers
-    double d_ij;
-    //vector for direction of force
-    Coord v_ij;
-    double E_ij_inverse = 1/((3.0/4.0)*(2*(1-pow(POISSON,2))/ELASTIC_MOD));
-    double sqrt_term;
-    //bending force necessities
-    //the angle made by my cell center, mom cell center and equilibrium point on mom membrane
-    double curr_angle;
-    //equilibrium angle is 90
-    double eps = 0.0001;
-    Coord mom_center = this->mother->get_Cell_Center();
-    Coord equi_point = this->mother->get_equi_point();
-    shared_ptr<Cell> this_cell = shared_from_this();
-    //for(unsigned int i = 0; i< neighbor_cells.size();i++){
-    	if(my_neighbor != this_cell){
-		neighbor_loc = my_neighbor->get_Cell_Center();
-		neighbor_radius = my_neighbor->get_radius();
-		d_ij = (my_loc-neighbor_loc).length();
-		v_ij = (my_loc - neighbor_loc);
-		sqrt_term = sqrt((my_radius*neighbor_radius)/(my_radius+neighbor_radius));
-		if(ADH_ON == 1){
-			//cout << "ADH_VARIABLE == " << ADH_ON << endl;
-			//ADHESION_ON IS A BOOLEAN IN PARAMETERS FILE
-			//turns in adhesion between mother and bud
-			if((my_neighbor == curr_bud)){
-                		if(this->has_bud){
-                        		//cout << "Cell rank " << this->rank << " has daughter " << this->curr_bud->get_rank() << endl;
-					//if(my_radius+neighbor_radius - d_ij < 0){
-                        			adh_force += v_ij*-1*K_ADH*(d_ij-(my_radius+neighbor_radius));
-					//}
-                    		}
-                    	}
-			else if((my_neighbor == mother)){
-                       		if(this->is_bud){
-                        		//if(my_radius+neighbor_radius - d_ij < 0){
-                        			adh_force += v_ij*-1*K_ADH*(d_ij-(my_radius+neighbor_radius));
-						//curr_angle = this->compute_angle();
-						//if(abs(curr_angle - pi/2) < eps){
-							//do nothing theyre close
-						//}
-						/*else{
-							double bend_constant = K_BEND*(curr_angle-pi/2)/(sqrt(1-pow(cos(curr_angle),2)));
-							Coord me_to_mom = mom_center- cell_center;
-							double me_to_mom_length = me_to_mom.length();
-							Coord mom_to_equi_point = equi_point-mom_center;
-							double mom_to_equi_point_length = mom_to_equi_point.length();
-							Coord term1 = mom_to_equi_point/(mom_to_equi_point_length*me_to_mom_length);
-							Coord term2 = me_to_mom*cos(curr_angle)/pow(me_to_mom_length,2);
-							bending_force = (term1 + term2)*bend_constant;
-						}*/
-					//}
-				}
-			}
-		}	
-		if(my_radius + neighbor_radius - d_ij >= 0){
-			rep_force += v_ij*.5*(1/d_ij)*pow(my_radius+neighbor_radius -d_ij,1.5)*E_ij_inverse*sqrt_term;
-			//cout << "rep_force" << rep_force << endl;
-		}
-		if((my_radius + neighbor_radius - d_ij < 1) && (my_radius + neighbor_radius - d_ij > -1)){
-			adh_force_reg += v_ij*SINGLE_BOND_BIND_ENERGY*RECEPTOR_SURF_DENSITY*KB*TEMPERATURE*M_PI*(my_radius + neighbor_radius)*.5*-1;
-		}		
-		
-		
-	
-     }
-     //cout << "Rep_force" << rep_force << endl;
-     //Coord unit_vec = (rep_force + adh_force + adh_force_reg);
-     //double length_vec =  (rep_force + adh_force + adh_force_reg).length();
-     //cout  <<"unit vec" << unit_vec<< "length" << length_vec <<  endl;
-     curr_force = rep_force + adh_force + adh_force_reg;
-     //cout <<"curr force"  << curr_force << endl;// + adh_force;// + bending_force;
-     return curr_force;
-}
-
 void Cell::calc_forces_chou(){
     double d_ij;
     double delta_d;
@@ -927,12 +891,8 @@ void Cell::lennard_jones_potential(){
     return;
 
 }
-void Cell::update_location(){
-    //cout << this->curr_bud << endl;
-    cell_center = cell_center + curr_force*1.0/(1+(curr_radius/2))*dt;
-	return;
-}
-/*void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
+
+void Cell::dnpm(const state_type &x, state_type& dxdt, double t){
 	int fsum = 0;
 	int size_x = x.size()-1;
 	for(unsigned int i = 1; i<size_x; i++){
@@ -950,32 +910,10 @@ void Cell::update_location(){
 	}
 	return;
 
-}*/
-/*void Cell::compute_protein_conc_DNPM(){
+}
+void Cell::compute_protein_conc_DNPM(){
 	state_type x = {10, 1, 1, 1};
 	integrate(ref(*this), x, 0,10,.1);
 	return;
 }*/
-
-void Cell::print_txt_file_format(ofstream& ofs){
-    ofs << rank << " " << cell_center.get_X() << " " << cell_center.get_Y() << " " << curr_radius << " ";
-    for(unsigned int i = 0; i < this->griesemer_lineage.size();i++){
-    	ofs << "/" << griesemer_lineage.at(i);
-    }
-    ofs << " ";
-    //cout << "getting vec" << endl;
-    vector<int> lineages;
-    return_lineage_vec(lineages);
-    //cout << "lineages loop" << endl;
-    for(unsigned int i = 0; i < lineages.size();i++){
-    ofs << "/" << lineages.at(i);
-    }
-    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->get_bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << " " << bin_id << endl;
-    //ofs << " " << this->get_color() << endl;
-    return;
-}
-void Cell::print_cell_center(ofstream& ofs){
-    ofs << cell_center.get_X() << " " << cell_center.get_Y() << " " << 0 << endl;
-    return;
-}
 	

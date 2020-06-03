@@ -76,10 +76,12 @@ void Mesh_Pt::calculate_nutrient_concentration(){
 	double total_mass = 0;
 	double multiplier; 
 	for(unsigned int i = 0;i<cells.size();i++){
-		curr_mass = M_PI*pow(cells.at(i)->get_radius(),2);
+		curr_mass = M_PI*pow(cells.at(i)->get_curr_radius(),2);
 		total_mass += curr_mass;
 	}
-	multiplier = this->nutrient_conc -(1-total_mass/K_MASS)*this->nutrient_conc*dt;
+	//cout << "Conc: " << nutrient_conc << endl;
+	multiplier = this->nutrient_conc -NUTRIENT_DECAY*(total_mass/K_MASS)*this->nutrient_conc*dt;
 	this->nutrient_conc = multiplier;
+	//cout << "Multiplier: " << multiplier << endl;
 	return;
 }
