@@ -38,7 +38,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		int age;
 		int T_age;
 		double my_G1_length;
-		double my_G2_length;
+		double my_Budded_phase;
 		bool G1;
 		bool S;
 		bool G2;
@@ -79,7 +79,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		int get_age(){return age;}
 		int get_T_age(){return T_age;}
 		double get_G1_length(){return my_G1_length;}
-		double get_G2_length(){return my_G2_length;}
+		double get_G2_length(){return my_Budded_phase;}
 		bool is_G1(){return G1;}
 		bool is_G2(){return G2;}
 		bool is_S(){return S;}
@@ -117,6 +117,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		void find_bin();
 		//functions used to adjust growth rate of cells based
 		//on nutrient concentration of their current bin
+		double calc_cci(double G1, double budding);
 		void update_growth_rate();	 		
    		double get_nutrient_conc(int bin_id);
 		void grow_cell();

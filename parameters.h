@@ -27,9 +27,9 @@ const int OUTPUT_FREQ = 6250;
 
 //Cell parameters
 const double average_G1_mother =  10.0;//minutes
-const double average_G2_mother = 80.0;//minutes
+const double average_Budded_phase= 80.0;//minutes
 const double average_radius =  3.1;//microns
-const double extra_G1_daughter = 40.0;//minutes
+const double average_G1_daughter = 40.0;//minutes
 //average length of G1 for daughter cell is 75 minutes
 //45 minutes on mother, 30 minutes growing before
 //daughter forms new bud of its own
@@ -60,7 +60,7 @@ const double Gamma = .00008;
 const double mu = .0077;
 const int n_0 = 1;
 const int array_size = 4;
-const double eta =  5.0;
+const double eta = 2.5;
 const double THETA = .75;
 //const bool ADHESION_ON = true;
 const double SIGMA = .5;

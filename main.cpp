@@ -36,7 +36,7 @@ double r_LOGISTIC = 1;
 double A_LOGISTIC = 35;
 //Carrying capacity for logistic equation
 //governing nutrient concentration in each bucket
-double K_MASS = 25*M_PI*pow(2.775,2);
+double K_MASS = 18*M_PI*pow(3.1,2);
 double NUTRIENT_DECAY = .05;
 int main(int argc, char* argv[]) {
     //cout << "Starting" << endl;
@@ -76,9 +76,9 @@ int main(int argc, char* argv[]) {
     //cout << "make mesh" << endl;
     auto mesh_for_bins = make_shared<Mesh>();
     //leftmost point for mesh
-    int start_1 = -500;
+    int start_1 = -400;
     //rightmost point for mesh
-    int start_2 = 500;
+    int start_2 = 400;
     //each square unit on mesh will be this many units
     double increment = 25.0;
     int num_buckets = 2*ceil(start_2/increment);

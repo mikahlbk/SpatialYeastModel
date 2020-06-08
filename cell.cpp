@@ -36,7 +36,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init
     this->age = 0;
     this->T_age = 0;
     this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->my_Budded_phase = average_Budded_phase + average_Budded_phase*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
     //reset this after every mitosis because this determines the
     // length of time the next daughterwill spend on the mother cell
     this->G1 = true;
@@ -44,10 +44,10 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init
     this->S = false;
     this->M = false;
     this->growth_rate = max_radius/(my_G1_length);
-    this->cell_cycle_increment = 1.0/(my_G1_length + my_G2_length);
-    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
-    this->CP = .1;
-    this->is_mother = false;
+    this->cell_cycle_increment = this->calc_cci(my_G1_length,my_Budded_phase);
+    this->theoretical_cci = cell_cycle_increment;
+    this->CP = 0;
+    this->is_mother = true;
     this->has_bud = false;
     //curr_bud assigned in budding function
     //each new daughter is added to daughters vec in budding function
@@ -80,15 +80,15 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double ini
     //bin id assigned in function
     this->age = 0;
     this->T_age = 0;
-    this->my_G1_length = g_two_from_mother + extra_G1_daughter + extra_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
-    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->my_G1_length = g_two_from_mother + average_G1_daughter + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->my_Budded_phase = average_Budded_phase + average_Budded_phase*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
     this->G1 = true;
     this->G2 = false;
     this->S = false;
     this->M = false;
-    this->growth_rate = max_radius/(my_G1_length + my_G2_length);
-    this->cell_cycle_increment = 1.0/(my_G1_length + my_G2_length);
-    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
+    this->growth_rate = max_radius/(my_G1_length);
+    this->cell_cycle_increment = this->calc_cci(my_G1_length,my_Budded_phase);
+    this->theoretical_cci = cell_cycle_increment;
     this->CP = 0;
     this->is_mother = false;
     this->has_bud = false;
@@ -283,13 +283,16 @@ void Cell::find_bin(){
      this->bin_id = smallest_index;
      return;
 }
+double Cell::calc_cci(double G1, double budding){
+     double cci = 1.0/(G1 + budding);
+     return cci;
+}
 void Cell::update_growth_rate(){
      double multiplier = this->get_nutrient_conc(bin_id);
-     if(multiplier > .1){
-	this->cell_cycle_increment = this->theoretical_cci;
-     }else{
-	this->cell_cycle_increment = this->theoretical_cci*multiplier;
-     }
+     //this->my_G1_length = this->my_G1_length + this->my_G1_length*(1-multiplier);
+     //this->my_Budded_phase = this->my_Budded_phase + this->my_Budded_phase*(1-multiplier);
+     //this->cell_cycle_increment = calc_cci(this->my_G1_length,this->my_Budded_phase);
+     this->cell_cycle_increment = this->theoretical_cci*multiplier;
      //cout << "Nutrient Conc: " << multiplier << "Cell cycle: " << cell_cycle_increment << endl; 
      return;
 }
@@ -314,14 +317,18 @@ void Cell::grow_cell(){
 void Cell::update_cell_cycle(){
      this->T_age++;
      shared_ptr<Cell> this_cell = shared_from_this();
-     if(this->G1 && this->CP >= .1 && this->age >0){
-     	//cout << "cell cycle" << cell_cycle_increment << "actual " << CP << endl;
+     if((this->G1) && (this->CP >= .11) && (is_mother)){
 	this->G1 = false;
 	this->S = true;
+	//cout << "Rank: " << rank << "CP: " << CP << endl;
      }
-     else if(this->G1 && this->CP >= 1 && this->age < 1){
-	this->G1 = false;
+     if((this->G1) && (this->CP >= .6) && (!is_mother)){
+	this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+	this->cell_cycle_increment = calc_cci(this->my_G1_length,this->my_Budded_phase);
+	this->theoretical_cci = this->cell_cycle_increment;
+        this->G1 = false;
 	this->S = true;
+	//cout << "Rank: " << rank << "CP: " << CP << endl;
      }
      if(is_bud && (curr_radius >= size_at_div)){
 	this_cell->get_mother()->enter_mitosis();
@@ -350,22 +357,22 @@ void Cell::perform_budding(int Ti){
     double mother_division_site;
     bool used = false;
     
-    if(Division_Pattern==0){//axial
-    	mother_division_site = this->curr_div_site;//axial same side
-    }else if(Division_Pattern == 1){//bipolar
-	mother_division_site = this->curr_div_site + M_PI;//bipolar opposite side
-    }else if(Division_Pattern == 2){//mixed
-	if(mother_status()){
+     if(mother_status()){
+    	if(Division_Pattern==0){//axial
+    		mother_division_site = this->curr_div_site;//axial same side
+    	}else if(Division_Pattern == 1){//bipolar
+		mother_division_site = this->curr_div_site + M_PI;//bipolar opposite side
+    	}else if(Division_Pattern == 2){//mixed
 		//50% chance axial or bipolar
 		if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
 			mother_division_site = this->curr_div_site;
 		}else{
 			mother_division_site = this->curr_div_site + M_PI;
-		}
-	}else{
-		mother_division_site = this->curr_div_site + M_PI;
-	}
-    }    
+		}		
+    	}
+     }else{
+	mother_division_site = this->curr_div_site + M_PI;
+     }	    
     //50% chance move up or down a little
     if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
     	//move 10 degrees counter clockwise until new spot found
@@ -414,7 +421,7 @@ void Cell::perform_budding(int Ti){
     }
     //cout << "New cell rank: " << new_rank << endl;
     //****new cell stuff***
-    auto new_cell = make_shared<Cell>(this_colony, daughter_cell_rank, new_center, daughter_init_radius,this_cell,this->rank,mother_division_site+M_PI,new_lineage, new_g_lineage, sector,this->color,this->my_G2_length);
+    auto new_cell = make_shared<Cell>(this_colony, daughter_cell_rank, new_center, daughter_init_radius,this_cell,this->rank,mother_division_site+M_PI,new_lineage, new_g_lineage, sector,this->color,this->my_Budded_phase);
     new_cell->find_bin();
     //***mother cell stuff***
     this->G1 = false;
@@ -447,10 +454,6 @@ void Cell::perform_mitosis(int Ti){
     this->S = false;
     this->G2 = false;
     this->M = false;
-    this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    this->my_G2_length = average_G2_mother + average_G2_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    this->theoretical_cci = 1.0/(my_G1_length + my_G2_length);
-    this->cell_cycle_increment = theoretical_cci;
     this->CP = 0;
     //daughter remains G1 and mother gets set to G1
     return;
@@ -579,7 +582,7 @@ Coord Cell::calc_forces_Hertz(shared_ptr<Cell> my_neighbor){
      return curr_force;
 }
 void Cell::update_location(){
-    cell_center = cell_center + curr_force*1.0/(1+(curr_radius/2))*dt;
+    cell_center = cell_center + curr_force*(1.0/(1.0+eta*(curr_radius)))*dt;
     return;
 }
 void Cell::print_txt_file_format(ofstream& ofs){
