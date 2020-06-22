@@ -30,13 +30,13 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init
     this->cell_center = cell_center;
     this->max_radius = average_radius + average_radius*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
     this->curr_radius = max_radius;
-    this->at_max_size = false;
+    this->at_max_size = true;
     //curr_force set in function
     //bin_id set in function
     this->age = 0;
     this->T_age = 0;
     this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-    this->my_Budded_phase = average_Budded_phase + average_Budded_phase*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->my_Budded_phase = average_budded_period_mother + average_budded_period_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
     //reset this after every mitosis because this determines the
     // length of time the next daughterwill spend on the mother cell
     this->G1 = true;
@@ -58,8 +58,8 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init
     this->mother_rank = rank;  
     //lineage vec filled out in make founder function
     griesemer_lineage.push_back(0);
-    this->sector = 0;
-    
+    this->sector = rank;
+    this->four_lineage = rank; 
     //**** get rid of these ASAP****
     this->curr_protein = P_0;
     this->color = 0;
@@ -68,20 +68,19 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center,double init
     return;
 }
 //Constructor for new daugher after division
-Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mother,int mother_rank, double div_site, vector<int> lineage, vector<int>g_lineage,int sector, int my_col, double g_two_from_mother){
+Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mother,int mother_rank, double div_site, vector<int> lineage, vector<int>g_lineage,int sector, int my_col, double g_two_from_mother,int mother_four_lineage){
     this->my_colony = my_colony;
     this->rank = rank;
     this->cell_center = cell_center;
     this->curr_radius = init_radius;
     this->max_radius = average_radius + average_radius*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
- ;
     this->at_max_size = false;
     //curr_force set in function
     //bin id assigned in function
     this->age = 0;
     this->T_age = 0;
     this->my_G1_length = g_two_from_mother + average_G1_daughter + average_G1_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
-    this->my_Budded_phase = average_Budded_phase + average_Budded_phase*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->my_Budded_phase = average_budded_period_daughter + average_budded_period_daughter*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
     this->G1 = true;
     this->G2 = false;
     this->S = false;
@@ -102,7 +101,7 @@ Cell::Cell(shared_ptr<Colony> my_colony, int rank, Coord cell_center, double ini
     this->lineage = lineage;
     this->griesemer_lineage = g_lineage;
     this->sector = sector;
-   
+    this->four_lineage = mother_four_lineage;  
     //******get rid of these ASAP**********
     this->equi_point = cell_center;
     this->curr_protein = 0;
@@ -314,24 +313,29 @@ void Cell::grow_cell(){
     }
     return;
 }
+void Cell::daughter_to_mother_cell_cycle_changes(){
+    this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
+    this->my_Budded_phase = average_budded_period_mother + average_budded_period_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0);
+    this->growth_rate = max_radius/(my_G1_length);
+    this->cell_cycle_increment = this->calc_cci(my_G1_length,my_Budded_phase);
+    this->theoretical_cci = cell_cycle_increment;
+    return;
+}
+double Cell::G1_check(){
+     return this->my_G1_length/(my_G1_length + my_Budded_phase);
+}
+
 void Cell::update_cell_cycle(){
      this->T_age++;
      shared_ptr<Cell> this_cell = shared_from_this();
-     if((this->G1) && (this->CP >= .11) && (is_mother)){
+     if((this->G1) && (this->CP >= G1_check())){
 	this->G1 = false;
 	this->S = true;
 	//cout << "Rank: " << rank << "CP: " << CP << endl;
      }
-     if((this->G1) && (this->CP >= .6) && (!is_mother)){
-	this->my_G1_length = average_G1_mother + average_G1_mother*(this->my_colony->uniform_random_real_number(-10.0,10.0)/100.0); 
-	this->cell_cycle_increment = calc_cci(this->my_G1_length,this->my_Budded_phase);
-	this->theoretical_cci = this->cell_cycle_increment;
-        this->G1 = false;
-	this->S = true;
-	//cout << "Rank: " << rank << "CP: " << CP << endl;
-     }
-     if(is_bud && (curr_radius >= size_at_div)){
-	this_cell->get_mother()->enter_mitosis();
+     if((this->G2) && (this->CP >= 1)){
+	this->G2 = false;
+	this->M = true;
      }
      //cout << "cell cycle" << cell_cycle_increment << "actual " << CP << endl;
      CP = CP + cell_cycle_increment*dt;	
@@ -362,17 +366,25 @@ void Cell::perform_budding(int Ti){
     		mother_division_site = this->curr_div_site;//axial same side
     	}else if(Division_Pattern == 1){//bipolar
 		mother_division_site = this->curr_div_site + M_PI;//bipolar opposite side
-    	}else if(Division_Pattern == 2){//mixed
-		//50% chance axial or bipolar
+		if(mother_division_site > 2*M_PI){
+			mother_division_site = mother_division_site - 2*M_PI;
+		}
+	}else if(Division_Pattern == 2){//random
 		if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
-			mother_division_site = this->curr_div_site;
-		}else{
 			mother_division_site = this->curr_div_site + M_PI;
-		}		
-    	}
+			if(mother_division_site > 2*M_PI){
+				mother_division_site = mother_division_site - 2*M_PI;
+			}
+		}else{
+			mother_division_site = this->curr_div_site;			
+		}
+     }
      }else{
-	mother_division_site = this->curr_div_site + M_PI;
-     }	    
+	//if(Division_Pattern != 2){
+		mother_division_site = this->curr_div_site + M_PI;
+	//}
+     }	
+    
     //50% chance move up or down a little
     if(this->get_colony()->uniform_random_real_number(0.0,1.0)<=.5){
     	//move 10 degrees counter clockwise until new spot found
@@ -419,9 +431,10 @@ void Cell::perform_budding(int Ti){
     else{
     	sector = this->sector;
     }
+    int mother_four_lineage = this->four_lineage;
     //cout << "New cell rank: " << new_rank << endl;
     //****new cell stuff***
-    auto new_cell = make_shared<Cell>(this_colony, daughter_cell_rank, new_center, daughter_init_radius,this_cell,this->rank,mother_division_site+M_PI,new_lineage, new_g_lineage, sector,this->color,this->my_Budded_phase);
+    auto new_cell = make_shared<Cell>(this_colony, daughter_cell_rank, new_center, daughter_init_radius,this_cell,this->rank,mother_division_site+M_PI,new_lineage, new_g_lineage, sector,this->color,this->my_Budded_phase,mother_four_lineage);
     new_cell->find_bin();
     //***mother cell stuff***
     this->G1 = false;
@@ -455,6 +468,9 @@ void Cell::perform_mitosis(int Ti){
     this->G2 = false;
     this->M = false;
     this->CP = 0;
+    if(this->age == 1){
+	this->daughter_to_mother_cell_cycle_changes();
+    }
     //daughter remains G1 and mother gets set to G1
     return;
 }
@@ -598,7 +614,7 @@ void Cell::print_txt_file_format(ofstream& ofs){
     for(unsigned int i = 0; i < lineages.size();i++){
     ofs << "/" << lineages.at(i);
     }
-    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << " " << bin_id << endl;
+    ofs << " " << this->get_sector() << " " << this->get_age() << " " << this->get_T_age() << " " << this->bud_status() << " " << this->get_phase() << " " << this->get_CP() << " " << this->mother->get_rank() << " " << this->curr_protein << " " << bin_id << " " << four_lineage << endl;
     //ofs << " " << this->get_color() << endl;
     return;
 }

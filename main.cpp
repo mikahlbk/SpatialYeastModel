@@ -25,8 +25,10 @@ using namespace std;
 //*****************************************
 //buddding (1) vs. non-budding (0)
 int Budding_On = 1;
-//Axial = 1, Bipolar = 2, Mixed = 3;
-int Division_Pattern = 0;
+int Nutrient_On = 0;
+int Start_from_four = 0;
+//Axial = 0, Bipolar = 1, Random = 2;
+int Division_Pattern = 1;
 //Adhesion between all cells
 double SINGLE_BOND_BIND_ENERGY = 25;
 //Parameters for logistic equation governing
@@ -37,7 +39,7 @@ double A_LOGISTIC = 35;
 //Carrying capacity for logistic equation
 //governing nutrient concentration in each bucket
 double K_MASS = 18*M_PI*pow(3.1,2);
-double NUTRIENT_DECAY = .05;
+double NUTRIENT_DECAY = .003;
 int main(int argc, char* argv[]) {
     //cout << "Starting" << endl;
     //reads in name of folder to store output for visualization
@@ -59,6 +61,10 @@ int main(int argc, char* argv[]) {
 		K_MASS = stod(argv[i+1]);
 	}else if(!strcmp(argv[i],"-nutrient_decay")){
 		NUTRIENT_DECAY = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-nutrient_depletion")){
+		Nutrient_On = stod(argv[i+1]);
+	}else if(!strcmp(argv[i],"-start_from_four")){
+		Start_from_four = stod(argv[i+1]);
 	}
     }
     //keeps track of simulation time
@@ -141,8 +147,10 @@ int main(int argc, char* argv[]) {
 		growing_Colony->find_bin();
 		//cout << "bins" << endl;
 	}
-	growing_Colony->update_growth_rates();
-	//growth rate changes according to nutrient conc in bin
+	if(Nutrient_On){
+		growing_Colony->update_growth_rates();
+		//growth rate changes according to nutrient conc in bin
+	}
 	
         //growth
         //cout << "grow" << endl;

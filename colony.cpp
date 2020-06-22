@@ -30,6 +30,7 @@ Colony::Colony(shared_ptr<Mesh> new_mesh, mt19937  gen) {
 void Colony::make_founder_cell(){
      shared_ptr<Colony> this_colony = shared_from_this();
      int num_cells = 0;
+     if(!Start_from_four){
      //make founder cell
      //variables needed to 
      //feed to cell constructor
@@ -43,7 +44,62 @@ void Colony::make_founder_cell(){
      update_colony_cell_vec(new_cell);
      new_cell->set_mother(new_cell);
      new_cell->update_lineage_vec(rank); 
-    return;
+     //make founder cell
+     //variables needed to 
+     //feed to cell constructor
+     //double init_radius;
+     }
+     else if(Start_from_four){
+     double div_site = 2*M_PI*(this->uniform_random_real_number(0.0,1.0));
+     //Coord center;
+     int rank = 0;
+     double init_radius = 0;
+     Coord center = Coord(.1,.1);
+     auto new_cell1 = make_shared<Cell>(this_colony, rank, center, init_radius, div_site);
+     update_colony_cell_vec(new_cell1);
+     new_cell1->set_mother(new_cell1);
+     new_cell1->update_lineage_vec(rank);
+     //make founder cell
+     //variables needed to 
+     //feed to cell constructor
+     //double init_radius;
+     div_site = 2*M_PI*(this->uniform_random_real_number(0.0,1.0));
+     //Coord center;
+     rank = 1;
+     init_radius = 0;
+     center = Coord(.1,-.1);
+     auto new_cell2 = make_shared<Cell>(this_colony, rank, center, init_radius, div_site);
+     update_colony_cell_vec(new_cell2);
+     new_cell2->set_mother(new_cell2);
+     new_cell2->update_lineage_vec(rank); 
+     //make founder cell
+     //variables needed to 
+     //feed to cell constructor
+     //double init_radius;
+     div_site = 2*M_PI*(this->uniform_random_real_number(0.0,1.0));
+     //Coord center;
+     rank = 2;
+     init_radius = 0;
+     center = Coord(-.1,.1);
+     auto new_cell3 = make_shared<Cell>(this_colony, rank, center, init_radius, div_site);
+     update_colony_cell_vec(new_cell3);
+     new_cell3->set_mother(new_cell3);
+     new_cell3->update_lineage_vec(rank); 
+     //make founder cell
+     //variables needed to 
+     //feed to cell constructor
+     //double init_radius;
+     div_site = 2*M_PI*(this->uniform_random_real_number(0.0,1.0));
+     //Coord center;
+     rank = 3;
+     init_radius = 0;
+     center = Coord(-1.,-.1);
+     auto new_cell4 = make_shared<Cell>(this_colony, rank, center, init_radius, div_site);
+     update_colony_cell_vec(new_cell4);
+     new_cell4->set_mother(new_cell4);
+     new_cell4->update_lineage_vec(rank);
+     }
+     return;
 }
 /*void Colony:: make_founder_cell(string filename){
 	shared_ptr<Colony> this_colony = shared_from_this();

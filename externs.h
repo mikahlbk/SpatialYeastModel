@@ -13,4 +13,6 @@ extern double r_LOGISTIC;
 extern double A_LOGISTIC;
 extern double K_MASS;
 extern double NUTRIENT_DECAY;
+extern int Nutrient_On;
+extern int Start_from_four;
 #endif

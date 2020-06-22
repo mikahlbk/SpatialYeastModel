@@ -1,4 +1,4 @@
--p,fast.q,-hours,4,-cores,12,-test,hypothesis_sims
+-p,fast.q,-hours,4,-cores,12,-test,four_cell_sims
 -Budding,-division,-nutrient_decay
 1,0,.003
 1,1,.003

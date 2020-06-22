@@ -59,6 +59,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		vector<int> lineage;
 		vector<int> griesemer_lineage;
 		int sector;
+		int four_lineage;
 		double curr_protein;
         	int color;
 		Coord equi_point;
@@ -66,7 +67,7 @@ class Cell: public enable_shared_from_this<Cell>{
 		//Constructor for single founder
 		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double init_radius, double div_site);
         	//Constructor for new daughter after division
-        	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mmother,int mother_rank,double div_site, vector<int> lineage, vector<int> g_lineage, int sector, int my_col,double g2_from_mother);	
+        	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mmother,int mother_rank,double div_site, vector<int> lineage, vector<int> g_lineage, int sector, int my_col,double g2_from_mother,int mother_four_lineage);	
 		/*Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int bud_status, int phase, double CP, int Mother, int my_col);*/	
 		//***Getters***	
 		shared_ptr<Colony> get_colony(){return my_colony;}
@@ -121,6 +122,8 @@ class Cell: public enable_shared_from_this<Cell>{
 		void update_growth_rate();	 		
    		double get_nutrient_conc(int bin_id);
 		void grow_cell();
+		void daughter_to_mother_cell_cycle_changes();
+		double G1_check();
 		void update_cell_cycle();
 		void enter_mitosis();
 		void perform_budding(int Ti);

@@ -26,14 +26,11 @@ const double dt = (double)end_time/(double)NUM_STEPS;
 const int OUTPUT_FREQ = 6250;
 
 //Cell parameters
-const double average_G1_mother =  10.0;//minutes
-const double average_Budded_phase= 80.0;//minutes
-const double average_radius =  3.1;//microns
-const double average_G1_daughter = 40.0;//minutes
-//average length of G1 for daughter cell is 75 minutes
-//45 minutes on mother, 30 minutes growing before
-//daughter forms new bud of its own
-const double size_at_div = 2.0;
+const double average_G1_mother =  14;//minutes
+const double average_budded_period_mother= 71;//minutes
+const double average_G1_daughter = 25;//minutes
+const double average_budded_period_daughter = 81;//minutes
+const double average_radius = 2.58;//microns
 const double DIV_SHIFT_RADIANS = .174533;
 
 //adhesion between mother daughter cells
