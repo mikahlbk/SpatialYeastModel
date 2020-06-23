@@ -16,14 +16,14 @@
 //Simulation Constants
 
 //time in minutes
-const int end_time = 2880;
-const int NUM_STEPS = 2000000;//100000;
+const int end_time = 1680;
+const int NUM_STEPS = 2000000;
 
 //timestep
 const double dt = (double)end_time/(double)NUM_STEPS;
 
 //frequency of output for visualization
-const int OUTPUT_FREQ = 6250;
+const int OUTPUT_FREQ = 5952;
 
 //Cell parameters
 const double average_G1_mother =  14;//minutes
