@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 	ofs << "#SBATCH --job-name=\"" << test << "\"\n";
 	ofs << "#SBATCH -p " << p << " \n";
 
-	ofs << "export OMP_NUM_THREADS " << cores << "\n";
+	ofs << "export OMP_NUM_THREADS=" << cores << "\n";
 	ofs << "mkdir " << "Animate_" << test << "\n";
 	ofs << "./program " << "Animate_" << test; 
 	for (unsigned int i = 0; i < parameter_values.size(); i++ ) { 

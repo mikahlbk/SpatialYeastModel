@@ -7,7 +7,9 @@
 
 //**************************************
 //forward declarations
-
+class Colony;
+class Cell;
+class Mesh_Pt;
 //**************************************
 // include dependencies
 #include <boost/enable_shared_from_this.hpp>
@@ -20,24 +22,25 @@
 #include <memory>
 #include "parameters.h"
 #include "coord.h"
+#include "externs.h"
 #include "mesh_pt.h"
+#include "cell.h"
+#include "colony.h"
 //**************************************************
 //mesh struct declaration
 
 class Mesh: public enable_shared_from_this<Mesh>{
 	private:
-		vector<pair<shared_ptr<Mesh_Pt>,int>> mesh_pts;
+		shared_ptr<Mesh_Pt> mesh_pts[156][156];
 	public:
 		//constructor
 		Mesh();
-		void make_mesh_pts(double x_start, double y_start, int num_buckets, double increment);
-		void update_mesh_pts_vec(shared_ptr<Mesh_Pt>& new_mesh_pt, int index);
+		void make_mesh_pts(double x_start, double y_start, unsigned int num_buckets, double increment);
+		void assign_mesh_pt_neighbors();
 		void get_mesh_pts_vec(vector<shared_ptr<Mesh_Pt>>& mesh_points);
-		void assign_neighbors();
-		void assign_cell_to_bin(int& index, shared_ptr<Cell>& new_cell);
-		void get_cells_from_bin(int& index, vector<shared_ptr<Cell>>& neighbors);
-		void calculate_nutrient_concentration();
-		double get_nutrient_conc(int bin_id);
+		void clear_mesh_pt_cells();
+		void update_mesh_pt_nutrients();
+		//void update_mesh_pt_cells(int i, int j,shared_ptr<Cell> new_cell);
 };
 
 //end mesh class

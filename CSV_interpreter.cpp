@@ -18,7 +18,8 @@ using namespace std;
 //main and batch.
 int main(int argc, char* argv[]) { 
 
-        //Get file or exit.
+        //cout << "Hello" << endl;
+	//Get file or exit.
         if (argc == 1) {
                 cout << "Please provide CSV file name" << endl; 
                 return 0;
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]) {
         parameters.clear();
         stringstream command;
 
-
+	//cout << "Hello" << endl;
         //Change this to be the name of the .out file for generating batch script.
         string command_base = "./batchGenerator.out ";
         getline(CSV,line);

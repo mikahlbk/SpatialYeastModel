@@ -12,6 +12,7 @@
 #include <memory>
 #include "parameters.h"
 #include "coord.h"
+#include "externs.h"
 #include "cell.h"
 #include "colony.h"
 #include "mesh_pt.h"
@@ -25,76 +26,128 @@ Mesh::Mesh(){
 	
 	return;
 }
-void Mesh::make_mesh_pts(double x_start, double y_start, int num_buckets, double increment){
+void Mesh::make_mesh_pts(double x_start, double y_start, unsigned int num_buckets, double increment){
 	shared_ptr<Mesh> this_mesh = shared_from_this();
 	double x_coord = x_start;
 	double y_coord = y_start;
-	int index = 1;
-	for (int i = 0;i < num_buckets+1 ;i++){
+	for (unsigned int i = 0; i < num_buckets;i++){
 		x_coord = x_start;
-		for(int j = 0; j<num_buckets+1; j++){	
-			auto new_mesh_pt= make_shared<Mesh_Pt>(this_mesh, x_coord, y_coord, index);
-			//should be paired vector
-			update_mesh_pts_vec(new_mesh_pt,index);
-			x_coord = x_coord + increment;
-			index++;
+		for(unsigned int j = 0; j<num_buckets; j++){	
+			auto new_mesh_pt= make_shared<Mesh_Pt>(this_mesh, x_coord, y_coord);
+			mesh_pts[i][j] = new_mesh_pt;
+			x_coord = x_coord + increment; 
 		}
 		y_coord = y_coord - increment;
 	}
-	//cout << "How many mesh points made?" << mesh_pts.size() << endl;
-	for(unsigned int i = 0; i< mesh_pts.size(); i++){
-		//cout << "index: " << mesh_pts.at(i).second << endl;
-		//cout << "center: " << mesh_pts.at(i).first->get_center() << endl;
-
-	}
+	this->assign_mesh_pt_neighbors();
 	return;
 
 }
-void Mesh::update_mesh_pts_vec(shared_ptr<Mesh_Pt>& new_mesh_pt, int index){
-	mesh_pts.push_back(make_pair(new_mesh_pt,index));
+void Mesh::assign_mesh_pt_neighbors(){
+	//cout << "Step 1" << endl;
+	for(unsigned int i = 1; i < 155; i++){
+		for(unsigned int j = 1; j < 155; j++){
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j-1]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j+1]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j-1]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+			mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j+1]);
+		}
+	}
+	//cout << "Step 2" << endl;
+	int i = 0;
+	for(unsigned int j = 1; j< 155; j++){
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j+1]);
+	}
+	//cout << "Step 3" << endl;
+	i = 155;
+	for(unsigned int j = 1; j< 155; j++){
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j+1]);
+	}	
+	//cout << "Step 4" << endl;
+	int j = 0;
+	for(unsigned int i = 1; i < 155; i++){
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j+1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j+1]);
+	}
+	//cout << "Step 5" << endl;
+	j = 155;
+	for(unsigned int i = 1; i< 155; i++){
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
+		mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j-1]);
+	}
+	//cout << "Step 6" << endl;
+	i = 0;
+	j = 0;
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j+1]);
+	//cout << "Step 7" << endl;
+	i = 0;
+	j = 155;
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j-1]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i+1][j]);
+	//cout << "Step 8" << endl;
+	i = 155;
+	j = 0;
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j+1]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j+1]);
+	//cout << "Step 9" << endl;
+	i = 155;
+	j = 155;
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i-1][j-1]);
+	mesh_pts[i][j]->update_neighbor_list(mesh_pts[i][j-1]);
 	return;
 }
 void Mesh::get_mesh_pts_vec(vector<shared_ptr<Mesh_Pt>>& new_mesh_pts){
-	for(unsigned int i = 0; i < mesh_pts.size(); i++){
-		new_mesh_pts.push_back(this->mesh_pts.at(i).first);
-	}
-	return;
-}
-void Mesh::assign_neighbors(){
-	for(unsigned int i = 0; i<mesh_pts.size();i++){
-		//cout << "Mesh Pt " << i << "neighbors" << endl;
-		mesh_pts.at(i).first->find_neighbor_bins();
+	for(unsigned int i = 0; i < 156; i++){
+		for(unsigned int j = 0; j < 156; j++){
+			new_mesh_pts.push_back(this->mesh_pts[i][j]);
+		}
+
 	}
 
 	return;
 }
+void Mesh::clear_mesh_pt_cells(){
+	for(unsigned int i = 0; i < 156; i++){
+		for(unsigned int j = 0; j < 156; j++){
+			mesh_pts[i][j]->clear_my_cells();
+		}
 
-void Mesh::assign_cell_to_bin(int& index, shared_ptr<Cell>& new_cell){
-	this->mesh_pts.at(index).first->add_cell(new_cell);
-	return;
-}
-void Mesh::get_cells_from_bin(int& index, vector<shared_ptr<Cell>>& neighbors){
-	//cout << "i think its an index problem" << endl;
-	//cout << "num msh pts" << mesh_pts.size()<< endl;
-	//cout << "index cell from bin function " << index << endl;
-	//cout << "this bin" << endl;
-	vector<shared_ptr<Mesh_Pt>> neighbor_bins;
-	this->mesh_pts.at(index).first->get_cells(neighbors);
-	//cout << "neighbor bins" << endl;
-	this->mesh_pts.at(index).first->get_neighbor_bins(neighbor_bins);
-	for(unsigned int i = 0; i<neighbor_bins.size();i++){
-		neighbor_bins.at(i)->add_cells_to_neighbor_vec(neighbors);
 	}
-	//cout << "but it could be somthing else" << endl;
-	//get neighbors
-	//push back cells from neighbors
 	return;
-
 }
-double Mesh::get_nutrient_conc(int bin_id){
-	shared_ptr<Mesh_Pt> curr_mesh_pt = this->mesh_pts.at(bin_id).first;
-	double conc = curr_mesh_pt ->get_nutrient_conc();
-	return conc;
+void Mesh::update_mesh_pt_nutrients(){
+	for(unsigned int i = 0; i < 156; i++){
+		for(unsigned int j = 0; j < 156; j++){
+			//cout << "Mesh Pt " << i << "neighbors" << endl;
+			mesh_pts[i][j]->update_my_nutrient_concentration();
+		}
+	}
+	return;
 }
-	
-	
+//void Mesh::update_mesh_pt_cells(int i, int j,shared_ptr<Cell> new_cell){
+//	this->mesh_pts[i][j]->update_my_cells(new_cell);
+//	return;
+//}	

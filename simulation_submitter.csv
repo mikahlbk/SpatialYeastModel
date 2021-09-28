@@ -1,0 +1,6 @@
+-p,nodes,-hours,12,-cores,16,-test,first_official_runs
+-Budding,-Nutrient_Condition,-Substrate_Consumption,-Bistable_protein_dyn,-Initial_Protein,-Replication_rate,-Division_bias
+1,0,1,.005,100,.018,.36
+1,1,1,.005,100,.018,.36
+1,0,0,.005,100,.018,.36
+1,1,0,.005,100,.018,.36

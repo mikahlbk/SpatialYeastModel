@@ -7,7 +7,9 @@
 
 //******************************************
 // forward declarations
-
+class Cell;
+class Mesh;
+class Mesh_Pt;
 //******************************************
 // Include Dependencies
 #include <string>
@@ -26,6 +28,7 @@
 #include "coord.h"
 #include "cell.h"
 #include "mesh.h"
+#include "mesh_pt.h"
 #include "externs.h"
 //******************************************
 //COLONY Class Declaration
@@ -33,37 +36,37 @@
 class Colony: public enable_shared_from_this<Colony>{
 	private:
 		shared_ptr<Mesh> my_mesh;
-		mt19937 dist_generator;
+		default_random_engine my_engine;
 		vector<shared_ptr<Cell>> my_cells;
 		
 	public:
-		//constructor
-		Colony(shared_ptr<Mesh> my_mesh, mt19937 gen);
-        	//Colony(shared_ptr<Mesh> my_mesh);
+		//make colony
+		Colony(shared_ptr<Mesh> my_mesh);
+		
 		//make founder cell
-        	//void make_founder_cell(string filename);
-		void make_founder_cell();
-		//void make_founder_cell(string filename);
-		double uniform_random_real_number(double a, double b);
-		//getters and setters
-		void get_colony_cell_vec(vector<shared_ptr<Cell>>& curr_cells);
+		void   make_founder_cell(shared_ptr<Colony> this_colony, int Ti);
+		
+		//***Getters***
+		default_random_engine get_engine(){return my_engine;}
+		void get_colony_cell_vec(vector<shared_ptr<Cell>>& curr_cells){curr_cells = my_cells;}
+		int  get_num_cells(){return my_cells.size();}
+		shared_ptr<Mesh> get_my_mesh(){return my_mesh;}
+		
+		//***Setters**
 		void update_colony_cell_vec(shared_ptr<Cell> new_cell);
-		int get_num_cells();
-		shared_ptr<Mesh> get_mesh(){return my_mesh;}
+
 		//cell actions
-		void find_bin();
-		//void pull_daughter();
-		void grow_cells();
-		void update_cell_cycles(int Ti);
-        	void perform_budding(int Ti);
-		void perform_mitosis(int Ti);
-		//void match_up();
-		void update_locations();
-		//shared_ptr<Cell> return_cell(int cell_rank);
-		void update_growth_rates();
-		void update_protein_concentration();
-        	//void print_vtk_file(ofstream& ofs);
-        	void write_data(ofstream& ofs);
+		double roll_my_real_dis(int upper_bound);
+		void update_cell_bin_ids();
+		void update_cell_phase_lengths();
+		void update_cell_radii();
+		void perform_bud_separation();
+		void update_cell_cycle_phases();
+        	void add_buds(int Ti);
+		void update_cell_protein_concentrations();
+		void update_cell_locations();
+        	void update_mesh_nutrient_concentration();
+		void write_data(ofstream& ofs1, ofstream& ofs2);
 };
 
 //*********************************************

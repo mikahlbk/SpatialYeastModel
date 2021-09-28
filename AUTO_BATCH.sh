@@ -1,12 +1,12 @@
 #!/bin/bash -l
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=2G
-#SBATCH --time=0-4:00:00
-#SBATCH --output=final_nutrient_sims_longer_50.stdout
-#SBATCH --job-name="final_nutrient_sims_longer_50"
-#SBATCH -p fast.q 
-export OMP_NUM_THREADS 12
-mkdir Animate_final_nutrient_sims_longer_50
-./program Animate_final_nutrient_sims_longer_50 -Budding 0 -nutrient_depletion 1 -start_from_four 0 -division 2
+#SBATCH --time=0-12:00:00
+#SBATCH --output=first_official_runs_4.stdout
+#SBATCH --job-name="first_official_runs_4"
+#SBATCH -p nodes 
+export OMP_NUM_THREADS=16
+mkdir Animate_first_official_runs_4
+./program Animate_first_official_runs_4 -Budding 1 -Nutrient_Condition 1 -Substrate_Consumption 0 -Bistable_protein_dyn .005 -Initial_Protein 100 -Replication_rate .018 -Division_bias .36

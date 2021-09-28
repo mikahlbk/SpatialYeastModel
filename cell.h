@@ -8,7 +8,8 @@
 //*********************************************************
 // forward declarations
 class Colony;
-
+class Mesh;
+class Mesh_Pt;
 //*********************************************************
 // include dependencies
 #include <boost/enable_shared_from_this.hpp>
@@ -22,188 +23,169 @@ class Colony;
 #include "parameters.h"
 #include "coord.h"
 #include "externs.h"
+#include "colony.h"
+#include "mesh.h"
+#include "mesh_pt.h"
 //***********************************************************
 // Cell Class Declaration
 
 class Cell: public enable_shared_from_this<Cell>{
 	private:
+		//variables for cell location
+		Coord cell_center;
+		Coord curr_force;
+		shared_ptr<Mesh_Pt> bin_id;
+		
+		//variables for cell growth
+		double curr_radius;
+		double separation_radius;
+ 		double OG_separation_radius;
+		double max_radius;
+		double OG_max_radius;
+
+		//variables for cell cycle
+		int    curr_phase; //1 is G1, 2 is S/Ready for new Bud, 3 is G2
+		double my_OG_G1_length;
+		double my_G1_length;
+		double my_G1_tracker;
+		double my_OG_bud_phase_length;
+		double my_bud_phase_length;
+		bool   is_mother;
+		bool   is_daughter;
+		bool   has_bud;
+		bool   is_bud;
+		
+
+		//variables for cell lineage
 		shared_ptr<Colony> my_colony;
 		int rank;
-		Coord cell_center;
-		double curr_radius;
-		double max_radius;
-		bool at_max_size;
-		Coord curr_force;
-		int bin_id;
-		int age;
-		int T_age;
-		double my_G1_length;
-		double my_Budded_phase;
-		bool G1;
-		bool S;
-		bool G2;
-		bool M;
-		double growth_rate;
-		double cell_cycle_increment;
-		double theoretical_cci;
-		double CP;
-		bool is_mother;
-		bool has_bud;
-		shared_ptr<Cell> curr_bud;
-		vector<shared_ptr<Cell>> daughters;
-		vector<double> div_site_vec;
-		double curr_div_site;
-		bool is_bud;
+		int successor_number;
+		int division_age;
+		int time_born;
 		shared_ptr<Cell> mother;
-		int mother_rank;
-		vector<int> lineage;
-		vector<int> griesemer_lineage;
-		int sector;
-		int four_lineage;
+		shared_ptr<Cell> curr_bud;
+		vector<int> lineage_vec;
+		vector<int> daughter_vec;
+		double curr_div_site;
+		vector<double> div_sites_vec;
+		vector<int> division_times_vec;
+		//variables for protein dynamics
+		double lambda; //replication rate
+		double OG_lambda;
+		double rho;    //transmission bias
 		double curr_protein;
-        	int color;
-		Coord equi_point;
-	public:
-		//Constructor for single founder
-		Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double init_radius, double div_site);
-        	//Constructor for new daughter after division
-        	Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double init_radius, shared_ptr<Cell> mmother,int mother_rank,double div_site, vector<int> lineage, vector<int> g_lineage, int sector, int my_col,double g2_from_mother,int mother_four_lineage);	
-		/*Cell(shared_ptr<Colony> colony, int rank, Coord cell_center, double max_radius, double init_radius, double div_site, int bud_status, int phase, double CP, int Mother, int my_col);*/	
-		//***Getters***	
-		shared_ptr<Colony> get_colony(){return my_colony;}
-		int get_rank(){return rank;}
-		Coord get_cell_center(){return cell_center;}
- 		double get_curr_radius(){return curr_radius;}
-                double get_max_radius(){return max_radius;}
-		Coord get_curr_force(){return curr_force;}
-		int get_bin_id(){return bin_id;}
-		int get_age(){return age;}
-		int get_T_age(){return T_age;}
-		double get_G1_length(){return my_G1_length;}
-		double get_G2_length(){return my_Budded_phase;}
-		bool is_G1(){return G1;}
-		bool is_G2(){return G2;}
-		bool is_S(){return S;}
-		bool is_M(){return M;}
-		double get_growth_rate(){return growth_rate;}
-		double get_cell_cycle_increment(){return cell_cycle_increment;}
-		double get_CP(){return CP;}
-		bool mother_status(){return is_mother;}
-		bool currently_has_bud(){return has_bud;}
-		shared_ptr<Cell> get_curr_bud(){return curr_bud;}
-		void get_daughters_vec(vector<shared_ptr<Cell>>& curr_daughters);
-		void get_div_site_vec(vector<double>& previous_div_sites);
-		double get_curr_div_site(){return curr_div_site;}
-		bool bud_status(){return is_bud;}
-		shared_ptr<Cell>get_mother(){return mother;}
-		void set_mother(shared_ptr<Cell> mother);
-		int get_mother_rank(){return mother_rank;}
-		void get_lineage_vec(vector<int>& curr_lineage_vec);
-		void update_lineage_vec(int mother_rank);
-		void get_griesemer_lineage_vec(vector<int>& curr_griesemer_lineage);
-		int get_sector(){return sector;}
-		bool grown_to_full_size(){return at_max_size;}
-		double get_curr_protein(){return curr_protein;}
-		int get_color(){return color;}
-		int get_phase();	
-		//***functions used when starting with > 1 cell***
-		void mother_bud_check();
-		void get_bud_status_mom(shared_ptr<Cell> mother);
-		void mother_rank_to_ptr();
-		void change_mother_vars(shared_ptr<Cell> mother_cell,shared_ptr<Cell> bud);
-		void return_bud_status();
-		//***************************************************
-
-		//functions used to put cell in correct bin
-		void find_bin();
-		//functions used to adjust growth rate of cells based
-		//on nutrient concentration of their current bin
-		double calc_cci(double G1, double budding);
-		void update_growth_rate();	 		
-   		double get_nutrient_conc(int bin_id);
-		void grow_cell();
-		void daughter_to_mother_cell_cycle_changes();
-		double G1_check();
-		void update_cell_cycle();
-		void enter_mitosis();
-		void perform_budding(int Ti);
-		void perform_mitosis(int Ti);
-		void set_has_bud_to_false();
-		void set_is_bud_to_false();
-		void compute_protein_concentration();
-		void set_protein_conc(double protein);
-		void get_cell_force();
- 		Coord calc_forces_Hertz(shared_ptr<Cell> my_neighbor);
-		void update_location();
-		void print_txt_file_format(ofstream& ofs); 
-		/*void mother_rank_to_ptr();
-		int get_phase();
-		void get_bud_status_mom(shared_ptr<Cell> mother);
-		void set_is_mother();
-		void set_at_max_size();
-		void get_daughters(vector<shared_ptr<Cell>>& daughter_cells);
-	        void add_daughter(shared_ptr<Cell> daughter);
-        	shared_ptr<Cell> get_bud() {return curr_bud;}
-		void set_bud(shared_ptr<Cell> bud);
-		shared_ptr<Cell> get_mother(){return mother;}
-		void set_mother(shared_ptr<Cell> mother);
-        	void reset_is_bud();
-        	void reset_has_bud();
-        	int get_bud_status();	
-		void update_growth_rate();	
-		double get_nutrient_conc(int bin_id);
-		void mother_bud_check();
-		void set_has_bud();
-		void change_mother_vars(shared_ptr<Cell> mother_cell,shared_ptr<Cell> bud_cell);
-		//cell cycle
-		double compute_distance(shared_ptr<Cell> neighbor_cell);
-		bool far_enough_from_neighbors(); 
-		void grow_cell();
-		void update_cell_cycle(int Ti);
-		void perform_budding(int Ti);
-		void enter_mitosis(int Ti);
-		void perform_mitosis(int Ti);
-		void slow_grow_on();
-		void change_gr();
-		//force calculations
-		void get_cell_force();
-		Coord calc_forces_Hertz(shared_ptr<Cell> my_neighbor);
-		void calc_forces_jonsson();
-        	void calc_forces_chou();
-		void calc_forces_exponential();
-        	void lennard_jones_potential();
-        	void update_location();
-		Coord get_curr_force() {return curr_force;}	
-		//angle of bud
-		Coord get_equi_point(){return equi_point;}
-		double compute_angle();
-
-		//prion functions
-		double get_protein_conc(){return curr_protein;}
-		void compute_protein_conc_DNPM();
-        	void compute_protein_concentration();
         	
-		//lineage output
-		void update_lineage_vec(shared_ptr<Cell> me); 
-		void get_lineage_vec(vector<shared_ptr<Cell>>& lineage_cells);
-		void return_lineage_vec(vector<int>& new_vec);
-		void get_lineage_g_vec(vector<int>& lineage_g_cells);
-		int get_sector(){return sector;}
-      		
-		//binning functions
-		double calc_closest_center();
-        	void find_bin();
-		int get_bin_id() {return bin_id;}
+	public:
+		//Constructor for single founder cell
+		Cell(shared_ptr<Colony> my_colony, Coord cell_center, int rank, double new_div_site,int Ti);
+        	//Constructor for new bud
+        	Cell(Coord cell_center, shared_ptr<Cell> mother, double new_div_site,int Ti);
 		
-		//visualization
-		void print_txt_file_format(ofstream& ofs);
-        	void print_cell_center(ofstream& ofs);	
-		void pull_daughter();*/
+		//***Getters***	
 		
+		//cell location and forces info
+		Coord get_cell_center(){return cell_center;}
+		Coord get_curr_force(){return curr_force;}
+		shared_ptr<Mesh_Pt> get_bin_id(){return bin_id;}
+		
+		//cell growth info
+ 		double get_curr_radius(){return curr_radius;}
+		double get_separation_radius(){return separation_radius;}
+                double get_max_radius(){return max_radius;}
+		
+		//cell cycle info
+		int    get_curr_phase(){return curr_phase;}
+		double get_my_G1_length(){return my_G1_length;}
+		double get_my_G1_tracker(){return my_G1_tracker;}
+		double get_my_bud_phase_length(){return my_bud_phase_length;}
+		bool   check_is_mother(){return is_mother;}
+		bool   check_is_daughter(){return is_daughter;}
+		bool   check_has_bud(){return has_bud;}
+		bool   check_is_bud(){return is_bud;}
+
+		//cell lineage info
+		shared_ptr<Colony> get_my_colony(){return my_colony;}
+		int get_rank(){return rank;}
+		int get_successor_number(){return successor_number;}
+		int get_division_age(){return division_age;}
+		int get_time_born(){return time_born;}
+		shared_ptr<Cell> get_mother(){return mother;}
+		shared_ptr<Cell> get_curr_bud(){return curr_bud;}
+	        void   get_lineage_vec(vector<int>& curr_lineage_vec);
+		void   get_daughter_vec(vector<int>& daughter_vec);
+		int    get_num_daughters(){return this->daughter_vec.size();}
+		double get_curr_div_site(){return curr_div_site;}
+		void   get_div_sites_vec(vector<double>& div_sites_vec);
+                	
+		//protein dynamics info
+		double get_lambda(){return lambda;}
+		double get_rho(){return rho;}
+		double get_curr_protein(){return curr_protein;}
+
+	        //***Setters***
+
+		//cell location and forces info
+		void set_cell_center(Coord new_center){this->cell_center = new_center;}
+		void set_curr_force(Coord new_force){this->curr_force = new_force;}
+		void set_bin_id(shared_ptr<Mesh_Pt> new_bin_id){this->bin_id = new_bin_id;}
+
+	        //cell growth info
+		void set_curr_radius(double new_radius){this->curr_radius = new_radius;}
+		void set_separation_radius(double new_radius){this->separation_radius = new_radius;}
+		void set_max_radius(double new_radius){this->max_radius = new_radius;}
+		 
+		//cell cycle info
+		void set_curr_phase(int new_phase){this->curr_phase = new_phase;}
+		void set_my_G1_length(double new_length){this->my_G1_length = new_length;}
+		void set_my_G1_tracker(double new_tracker_val){this->my_G1_tracker = new_tracker_val;}
+		void set_my_bud_phase_length(double new_length){this->my_bud_phase_length = new_length;}
+		void set_is_mother(bool value){this->is_mother = value;}
+		void set_is_daughter(bool value){this->is_daughter = value;}
+		void set_has_bud(bool value){this->has_bud = value;}
+		void set_is_bud(bool value){this->is_bud = value;}
+		
+		//cell lineage info
+		void set_my_colony(shared_ptr<Colony> new_colony){this->my_colony = new_colony;}
+		void set_rank(int new_rank){this->rank = new_rank;}
+		void set_successor_number(int new_num){this->successor_number = new_num;}
+		void update_division_age(int number){this->division_age = this->division_age + 1;}
+		void set_division_age(int new_age){this->division_age = new_age;}
+		void set_time_born(int time){this->time_born = time;}
+		void set_mother(shared_ptr<Cell> new_mom){this->mother = new_mom;}
+		void set_curr_bud(shared_ptr<Cell> new_bud){this->curr_bud = new_bud;}
+		void update_lineage_vec(int new_lineage){this->lineage_vec.push_back(new_lineage);}
+		void set_lineage_vec(vector<int> new_vec){this->lineage_vec = new_vec;}
+		void set_curr_div_site(double new_site){this->curr_div_site = new_site;}
+		void update_div_sites_vec(double new_site){this->div_sites_vec.push_back(new_site);}
+		void set_div_sites_vec(vector<double> new_vec){this->div_sites_vec = new_vec;}
+
+		//protein dynamics info
+		void set_lambda(double new_lambda){this->lambda = new_lambda;}
+		void set_rho(double new_rho){this->rho = new_rho;}
+		void set_curr_protein(double new_protein){this->curr_protein = new_protein;}
+
+		//***Other Functions in order of appearance in cell.cpp***
+		shared_ptr<Mesh_Pt> find_my_nearest_bin();
+		void update_my_phase_length();
+		bool at_max_size();
+		void update_my_radius();
+		void perform_bud_separation();
+		void update_my_phase();
+		shared_ptr<Cell>  add_bud(int Ti);
+		double determine_new_div_site();	
+		shared_ptr<Cell> perform_budding(shared_ptr<Cell> mother_cell,double new_div_site,int Ti);	
+		void update_my_protein_concentration();
+		void compute_my_curr_force();
+		Coord calc_forces_Hertz(shared_ptr<Cell> my_neighbor);	
+		void update_my_location();
+		//output
+		void print_location_file_format(ofstream& ofs); 
+		void print_cell_cycle_file_format(ofstream& ofs);
+	
 };
 
-//End Cell Class
-//**************************************************************
+//***END OF FILE***
+//*******************************************************************************************************
 #endif
 
 
