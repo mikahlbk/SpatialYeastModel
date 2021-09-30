@@ -26,7 +26,7 @@ const double dt = (double)end_time/(double)NUM_STEPS;
 //frequency of output for visualization
 //6250*dt = how many minutes
 const int OUTPUT_FREQ = 6250;
-const int BIN_UPDATE_INCREMENT = 1000;
+const int BIN_UPDATE_INCREMENT = 6250;
 //Cell parameters
 const double AVERAGE_MAX_RADIUS = 2.58;//microns
 const double AVERAGE_G1_MOTHER  = 15;//minutes

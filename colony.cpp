@@ -98,11 +98,15 @@ void Colony::update_cell_cycle_phases(){
 }
 void Colony::add_buds(int Ti){
 	//cout << "My guess is here" << endl;
-	#pragma omp parallel for schedule(static,1)
+	shared_ptr<Mesh_Pt> my_bin;
+	//#pragma omp parallel for schedule(static,1)
 	for(unsigned int i = 0; i < my_cells.size(); i++){
 		shared_ptr<Cell> new_bud = my_cells.at(i)->add_bud(Ti);
 		if(new_bud){
-			#pragma omp critical
+			my_bin = new_bud->find_my_nearest_bin();
+			//pragma omp critical
+			my_bin->update_my_cells(my_cells.at(i));
+			//#pragma omp critical
 			my_cells.push_back(new_bud);
 		}
 	}

@@ -61,7 +61,6 @@ Cell::Cell(shared_ptr<Colony> my_colony, Coord cell_center, int rank, double new
     this->time_born        = birth_time;
     shared_ptr<Cell> my_mom(nullptr);
     this->mother           = my_mom;
-    this->lineage_vec.push_back(rank);
     this->curr_div_site    = new_div_site;
     this->div_sites_vec.push_back(new_div_site);
     //cell protein variables
@@ -291,11 +290,11 @@ shared_ptr<Cell>  Cell::add_bud(int Ti){
 		if(this->curr_phase == 2){
 			this->curr_div_site = this->determine_new_div_site();
 			this->div_sites_vec.push_back(curr_div_site);
+			this->division_age = division_age+1;
 			my_bud = this->perform_budding(mother_cell,curr_div_site,Ti);
 			//update colony cell vec
     			//this->my_colony->update_colony_cell_vec(my_bud);
 			this->has_bud = true;
-			this->division_age = division_age+1;
 			this->curr_bud = my_bud;
 			this->daughter_vec.push_back(my_bud->get_rank());
 			int div_time   = Ti;
@@ -306,11 +305,11 @@ shared_ptr<Cell>  Cell::add_bud(int Ti){
 		if((this->at_max_size()) && (this->curr_phase == 2)){
 			this->curr_div_site = this->determine_new_div_site();
 			this->div_sites_vec.push_back(curr_div_site);
+			this->division_age = division_age+1;
 			my_bud = this->perform_budding(mother_cell,curr_div_site,Ti);
 			//update colony cell vec
     			//this->my_colony->update_colony_cell_vec(my_bud);
 			this->has_bud = true;
-			this->division_age = division_age+1;
 			this->curr_bud = my_bud;
 			this->daughter_vec.push_back(my_bud->get_rank());
 			int div_time   = Ti;
@@ -391,16 +390,20 @@ void Cell::compute_my_curr_force(){
     	vector<shared_ptr<Cell>> neighbor_cells;
     	this->bin_id->get_neighbor_cells(neighbor_cells);
     	shared_ptr<Cell> this_cell = shared_from_this();
-    	#pragma omp parallel
+    	//cout << neighbor_cells.size() << endl;
+	#pragma omp parallel
     	{
     		#pragma omp declare reduction(+:Coord:omp_out+=omp_in) initializer(omp_priv(omp_orig))
 		#pragma omp for reduction(+:force) schedule(static,1)
 		for(unsigned int i = 0; i < neighbor_cells.size(); i++){
     			if(neighbor_cells.at(i) != this_cell){
 				force += this_cell->calc_forces_Hertz(neighbor_cells.at(i));
+				//#pragma omp critical
+				//cout << "Cell Rank: " << rank << "And force: " << force << endl;
 			}
 		}
      	}
+	//cout << curr_force << endl;
      	this->curr_force = force;
      	return;
 }//MBK
@@ -504,18 +507,24 @@ void Cell::print_cell_cycle_file_format(ofstream& ofs){
 		for(unsigned int i = 0; i < this->lineage_vec.size();i++){
 			ofs << "/" << lineage_vec.at(i);
 		}
+	}else{
+		ofs << "NAN";
 	}
 	ofs << " ";
 	if(this->daughter_vec.size() >0){
 		for(unsigned int i = 0; i < this->daughter_vec.size();i++){
 			ofs << "/" << daughter_vec.at(i);
 		}
-	ofs << " ";
+	}else{
+		ofs << "NAN";
 	}
+	ofs << " ";
 	if(div_sites_vec.size() > 0){
 	for(unsigned int i = 0; i < this->div_sites_vec.size();i++){
 		ofs << "/" << div_sites_vec.at(i);
 	}
+	}else{
+		ofs << "NAN";
 	}
 	ofs << endl;
 	return;
