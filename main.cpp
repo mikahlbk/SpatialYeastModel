@@ -23,40 +23,22 @@
 using namespace std;
 
 //*****************************************
-//buddding (1) vs. non-budding (0)
-int Budding_On = 1;
 //Nutrient Rich (0) vs. Nutrient Limited (1)
 int Nutrient_On = 0;
 //Rate of substrate consumption by cells
-double Substrate_uptake_rate = .05;
-//Parameters for bistable logistic
-//function governing protein dynamics
-int BISTABLE = 0;
-double P_0    = 50;
-double LAMBDA = 1.13/60;//strong
-double RHO    = .36;//strong
+double K_spring = .05;
 int main(int argc, char* argv[]) {
     //cout << "Program Starting" << endl;
     //reads in name of folder to store output for visualization
     string anim_folder = argv[1];
     for(int i = 1; i < argc; i++){
-    	if(!strcmp(argv[i], "-Budding")){
-		Budding_On = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Nutrient_Condition")){
-		Nutrient_On = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Substrate_Consumption")){
-		Substrate_uptake_rate = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Bistable_protein_dyn")){
-		BISTABLE = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Initial_Protein")){
-		P_0 = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Replication_rate")){
-		LAMBDA = stod(argv[i+1]);
-	}else if(!strcmp(argv[i],"-Division_bias")){
-		RHO = stod(argv[i+1]);
-	}	
+    	if(!strcmp(argv[i], "-Nutrient_limitation")){
+		    Nutrient_On = stod(argv[i+1]);
+	    }else if(!strcmp(argv[i],"-Adhesion_strength")){
+		    K_spring = stod(argv[i+1]);
+	    }	
     }
-    cout << "Budding = " << Budding_On << "Nutrient Condition = " << Nutrient_On << "Substrate Uptake Rate= " << Substrate_uptake_rate << "Bistable= " << BISTABLE << "Initial Protein= " << P_0 << "Replication Rate= " << LAMBDA << "Div Bias= " << RHO <<  endl;
+    cout << "Nutrient Condition = " << Nutrient_On << "Adhesion Strength = " << K_spring <<  endl;
     //keeps track of simulation time
     int start = clock(); 
     //****Make mesh for bins*****
@@ -92,47 +74,24 @@ int main(int argc, char* argv[]) {
 
    //****Loop for time steps****
    for (int Ti = 0; Ti < NUM_STEPS; Ti++) {
-	//cout << "Top of Time Loop" << endl;
-  	//if(growing_Colony->get_num_cells() > 4){
-		//vector<shared_ptr<Cell>> cells;
-		//growing_Colony->get_colony_cell_vec(cells);
-		//for(unsigned int i = 0; i < cells.size();i++){
-			//cout << "my rank " << endl;
-			//int rank = cells.at(i)->get_rank();
-			//cout << "mom rank" << endl;
-			//int mother_rank;
-			//if(cells.at(i)->get_mother()){
-			//	mother_rank = cells.at(i)->get_mother()->get_rank();
-			//}else{
-			//	mother_rank = -1;
-			//}
-			//cout << "time born" << endl;
-			//int bt = cells.at(i)->get_time_born();
-			//cout << "Cell: " << rank << " has mother "<< mother_rank << " and birth time " << bt << endl;
-			//cout << "Cell: " << rank << " has bin id" << cells.at(i)->get_bin_id() << " with nutrient conc " << cells.at(i)->get_bin_id()->get_my_nutrient_conc() << endl;
-		//}
-		//cout << "Ti" << clock() << endl;
-		//if(growing_Colony->get_num_cells() > 10){
-		//	exit(1);
-		//}
-	//}
-	//****Write data to txt file
-	//Change OUTPUT_FREQ to smaller number in parameters.h
-	//if you want to see more timesteps 
-	//cout << "In Time Loop" << endl;
-	if(Ti%OUTPUT_FREQ == 0){
-        	//open txt file for writing cell data
-            	Number = to_string(out);
-           	Filename1 = anim_folder + locations_init + Number + format;
-		Filename2 = anim_folder + cell_cycle_init + Number + format;
-            	myfile1.open(Filename1.c_str());
-		myfile2.open(Filename2.c_str());
-            	growing_Colony->write_data(myfile1,myfile2);
-            	myfile1.close();
-		myfile2.close();
-            	out++;
-        } 
-        //cout << "Time: " << Ti << endl;
+   //cout << "Top of Time Loop" << endl;
+   //****Write data to txt file
+   //Change OUTPUT_FREQ to smaller number in parameters.h
+   //if you want to see more timesteps 
+   //cout << "In Time Loop" << endl;
+   if(Ti%OUTPUT_FREQ == 0){
+        //open txt file for writing cell data
+        Number = to_string(out);
+        Filename1 = anim_folder + locations_init + Number + format;
+	    Filename2 = anim_folder + cell_cycle_init + Number + format;
+        myfile1.open(Filename1.c_str());
+	    myfile2.open(Filename2.c_str());
+        growing_Colony->write_data(myfile1,myfile2);
+        myfile1.close();
+	    myfile2.close();
+        out++;
+    } 
+   //cout << "Time: " << Ti << endl;
         
 	if(Ti%BIN_UPDATE_INCREMENT == 0){
 		growing_Colony->update_cell_bin_ids();
@@ -151,19 +110,19 @@ int main(int argc, char* argv[]) {
 	//and unbudded daughters that are
 	//still growing in G1
 		
-        growing_Colony->perform_bud_separation();
+    growing_Colony->perform_division();
 	//cout << "Buds Separated" << endl;
 	//Separates buds who have reached their assigned
 	//size of separation from their mothers
 	growing_Colony->update_cell_cycle_phases();
 	//cout << "Cell Cycles Updated" << endl;
 	//Updates the current cell cycle phase of cells
-	growing_Colony->add_buds(Ti);
+	//growing_Colony->add_buds(Ti);
 	//cout << "New Buds Added" << endl;
 	//Adds a bud to mother and new daughter cells
 	//that have finished G1
 
-	growing_Colony->update_cell_protein_concentrations();
+	//growing_Colony->update_cell_protein_concentrations();
 	//cout << "Protein Concentrations Updated"<< endl;
 	
 	growing_Colony->update_cell_locations();

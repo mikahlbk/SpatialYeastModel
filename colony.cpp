@@ -46,9 +46,9 @@ void Colony::make_founder_cell(shared_ptr<Colony> this_colony,int Ti){
      //parameters to be fed into founder cell constructor
      Coord center = Coord(0,0);
      int rank = 0;
-     double div_site = 2*M_PI*(this_colony->roll_my_real_dis(1));
+     //double div_site = 2*M_PI*(this_colony->roll_my_real_dis(1));
      //make the founder cell
-     auto new_cell = make_shared<Cell>(this_colony, center, rank, div_site,Ti);
+     auto new_cell = make_shared<Cell>(this_colony, center, rank,Ti);
      new_cell->find_my_nearest_bin();
      this->update_colony_cell_vec(new_cell);
      return;
@@ -82,10 +82,10 @@ void Colony::update_cell_radii(){
 	}
 	return;
 }
-void Colony::perform_bud_separation(){
+void Colony::perform_division(){
     	#pragma omp parallel for schedule(static,1)
 	for(unsigned int i=0; i < my_cells.size(); i++){
-		my_cells.at(i)->perform_bud_separation();
+		my_cells.at(i)->perform_division();
 	}
 	return;
 }
@@ -94,30 +94,6 @@ void Colony::update_cell_cycle_phases(){
 	for(unsigned int i = 0; i < my_cells.size(); i++){
 		my_cells.at(i)->update_my_phase();
 	}
-	return;
-}
-void Colony::add_buds(int Ti){
-	//cout << "My guess is here" << endl;
-	shared_ptr<Mesh_Pt> my_bin;
-	//#pragma omp parallel for schedule(static,1)
-	for(unsigned int i = 0; i < my_cells.size(); i++){
-		shared_ptr<Cell> new_bud = my_cells.at(i)->add_bud(Ti);
-		if(new_bud){
-			my_bin = new_bud->find_my_nearest_bin();
-			//pragma omp critical
-			my_bin->update_my_cells(my_cells.at(i));
-			//#pragma omp critical
-			my_cells.push_back(new_bud);
-		}
-	}
-	//cout << "Am I wrong?" << endl;
-	return;
-}
-void Colony::update_cell_protein_concentrations(){
-   #pragma omp parallel for schedule(static,1) 
-   for(unsigned int i=0; i< my_cells.size(); i++){
-        my_cells.at(i)->update_my_protein_concentration();
-    }
 	return;
 }
 void Colony::update_cell_locations(){
@@ -144,7 +120,7 @@ void Colony::update_mesh_nutrient_concentration(){
 void Colony::write_data(ofstream& ofs1, ofstream& ofs2){
     for(unsigned int i = 0; i < my_cells.size();i++){
         my_cells.at(i)->print_location_file_format(ofs1);
-	my_cells.at(i)->print_cell_cycle_file_format(ofs2);
+	//my_cells.at(i)->print_cell_cycle_file_format(ofs2);
     }
     return;
 }
